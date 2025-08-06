@@ -222,7 +222,7 @@ function PlayGameContent() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="min-h-screen h-screen flex flex-col max-w-screen overflow-x-hidden">
       {/* Header */}
       <header className="flex-shrink-0 bg-slate-800/70 backdrop-blur-sm border-b border-slate-600/30 p-4">
         <div className="max-w-lg mx-auto flex items-center justify-between">
@@ -272,7 +272,7 @@ function PlayGameContent() {
       </header>
 
       {/* Game Area - takes remaining space */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden px-2 sm:px-4">
         <GameBoard
           guesses={gameState.guesses}
           currentGuess={gameState.currentGuess}
@@ -284,7 +284,7 @@ function PlayGameContent() {
       </div>
 
       {/* Keyboard - always at bottom */}
-      <div className="flex-shrink-0 pb-safe">
+      <div className="flex-shrink-0 pb-safe px-2">
         <Keyboard
           onKeyPress={handleKeyPress}
           onEnter={handleEnter}

@@ -25,10 +25,10 @@ export default function Keyboard({
   const getKeyStyle = (key: string) => {
     const state = keyStates[key]?.status || 'unused';
     const baseStyle = `
-      flex-1 h-12 sm:h-14 rounded font-bold text-sm sm:text-base
+      flex-1 h-10 sm:h-14 rounded font-bold text-xs sm:text-base
       transition-all duration-200 active:scale-95
       flex items-center justify-center min-w-0 shadow-lg
-      min-h-[48px] touch-manipulation
+      min-h-[40px] sm:min-h-[48px] touch-manipulation
     `;
     
     if (disabled) {
@@ -48,10 +48,10 @@ export default function Keyboard({
   };
 
   const specialKeyStyle = `
-    h-12 sm:h-14 px-2 sm:px-4 rounded font-bold text-xs sm:text-sm
+    h-10 sm:h-14 px-1 sm:px-4 rounded font-bold text-xs sm:text-sm
     transition-all duration-200 active:scale-95
     flex items-center justify-center shadow-lg
-    min-h-[48px] min-w-[50px] touch-manipulation
+    min-h-[40px] sm:min-h-[48px] min-w-[40px] sm:min-w-[50px] touch-manipulation
     ${disabled 
       ? 'bg-slate-700 text-slate-500 cursor-not-allowed' 
       : 'bg-gradient-to-br from-slate-500 to-slate-600 text-white hover:from-slate-600 hover:to-slate-700 shadow-slate-500/30'
@@ -70,19 +70,19 @@ export default function Keyboard({
   );
 
   return (
-    <div className="w-full max-w-lg mx-auto p-2 sm:p-4 keyboard-container">
-      {/* Top row */}
-      <div className="flex gap-1 sm:gap-2 mb-2">
+    <div className="w-full max-w-lg mx-auto p-1 sm:p-4 keyboard-container overflow-hidden">
+      {      /* Top row */}
+      <div className="flex gap-0.5 sm:gap-2 mb-1 sm:mb-2">
         {topRow.map(renderKey)}
       </div>
       
-      {/* Middle row */}
-      <div className="flex gap-1 sm:gap-2 mb-2 px-2 sm:px-4">
+      {      /* Middle row */}
+      <div className="flex gap-0.5 sm:gap-2 mb-1 sm:mb-2 px-1 sm:px-4">
         {middleRow.map(renderKey)}
       </div>
       
-      {/* Bottom row */}
-      <div className="flex gap-1 sm:gap-2">
+      {      /* Bottom row */}
+      <div className="flex gap-0.5 sm:gap-2">
         <button
           className={`${specialKeyStyle} keyboard-key`}
           onClick={() => !disabled && onEnter()}
@@ -92,7 +92,7 @@ export default function Keyboard({
           <span className="hidden sm:inline text-xs">ENTER</span>
         </button>
         
-        <div className="flex gap-1 sm:gap-2 flex-1">
+        <div className="flex gap-0.5 sm:gap-2 flex-1">
           {bottomRow.map(renderKey)}
         </div>
         
