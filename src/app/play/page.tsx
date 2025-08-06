@@ -140,7 +140,7 @@ function PlayGameContent() {
     // Handle game end
     if (won || lost) {
       const stats = updateStats(won, newGuesses.length);
-      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses);
+      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode);
       setShareText(shareTextContent);
       setTimeout(() => setShowGameOver(true), 1000);
     }

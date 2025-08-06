@@ -95,11 +95,13 @@ export function generateShareText(
   guesses: string[],
   word: string,
   gameStatus: 'won' | 'lost',
-  maxGuesses: number
+  maxGuesses: number,
+  hardMode: boolean = false
 ): string {
+  const hardModeIndicator = hardMode ? ' *' : '';
   const result = gameStatus === 'won' 
-    ? `${guesses.length}/${maxGuesses === Infinity ? '∞' : maxGuesses}`
-    : `X/${maxGuesses === Infinity ? '∞' : maxGuesses}`;
+    ? `${guesses.length}/${maxGuesses === Infinity ? '∞' : maxGuesses}${hardModeIndicator}`
+    : `X/${maxGuesses === Infinity ? '∞' : maxGuesses}${hardModeIndicator}`;
   
   let grid = '';
   guesses.forEach(guess => {
@@ -123,7 +125,8 @@ export function generateShareText(
   // Generate encrypted game code and full URL
   const encryptedGame = encryptWordle({
     word: word.toUpperCase(),
-    maxGuesses: maxGuesses
+    maxGuesses: maxGuesses,
+    hardMode: hardMode
   });
   
   // Get the current domain or use a placeholder for the full URL
