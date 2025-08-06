@@ -1,0 +1,59 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#334155;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e293b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="amber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d97706;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="slate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#64748b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#bg)"/>
+  
+  <!-- Letter tiles arranged in a mini Wordle grid -->
+  <!-- Row 1: G (correct) -->
+  <rect x="4" y="4" width="6" height="6" rx="1" fill="url(#emerald)" stroke="#10b981" stroke-width="0.5"/>
+  <text x="7" y="9" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">G</text>
+  
+  <!-- Row 1: L (present) -->
+  <rect x="12" y="4" width="6" height="6" rx="1" fill="url(#amber)" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="15" y="9" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">L</text>
+  
+  <!-- Row 1: O (absent) -->
+  <rect x="20" y="4" width="6" height="6" rx="1" fill="url(#slate)" stroke="#64748b" stroke-width="0.5"/>
+  <text x="23" y="9" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">O</text>
+  
+  <!-- Row 2: W (correct) -->
+  <rect x="4" y="12" width="6" height="6" rx="1" fill="url(#emerald)" stroke="#10b981" stroke-width="0.5"/>
+  <text x="7" y="17" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">W</text>
+  
+  <!-- Row 2: Empty tile -->
+  <rect x="12" y="12" width="6" height="6" rx="1" fill="none" stroke="#475569" stroke-width="0.5"/>
+  
+  <!-- Row 2: Empty tile -->
+  <rect x="20" y="12" width="6" height="6" rx="1" fill="none" stroke="#475569" stroke-width="0.5"/>
+  
+  <!-- Row 3: D (correct) -->
+  <rect x="4" y="20" width="6" height="6" rx="1" fill="url(#emerald)" stroke="#10b981" stroke-width="0.5"/>
+  <text x="7" y="25" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">D</text>
+  
+  <!-- Row 3: L (present) -->
+  <rect x="12" y="20" width="6" height="6" rx="1" fill="url(#amber)" stroke="#f59e0b" stroke-width="0.5"/>
+  <text x="15" y="25" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">L</text>
+  
+  <!-- Row 3: E (correct) -->
+  <rect x="20" y="20" width="6" height="6" rx="1" fill="url(#emerald)" stroke="#10b981" stroke-width="0.5"/>
+  <text x="23" y="25" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">E</text>
+</svg> 
