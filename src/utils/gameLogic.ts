@@ -37,6 +37,60 @@ export function isValidWord(word: string, length: number): boolean {
   return word.length === length && /^[A-Za-z]+$/.test(word) && length >= 1 && length <= 30;
 }
 
+/**
+ * Validates if a guess follows hard mode rules
+ * Hard mode requires all revealed hints (green and yellow letters) to be used in subsequent guesses
+ */
+export function validateHardModeGuess(
+  guess: string, 
+  previousGuesses: string[], 
+  word: string
+): { isValid: boolean; error?: string } {
+  if (previousGuesses.length === 0) {
+    return { isValid: true }; // First guess is always valid
+  }
+
+  // Collect all revealed hints from previous guesses
+  const requiredGreenLetters: { [position: number]: string } = {};
+  const requiredYellowLetters: Set<string> = new Set();
+
+  previousGuesses.forEach(prevGuess => {
+    const result = checkGuess(prevGuess, word);
+    result.forEach((letterState, position) => {
+      if (letterState.status === 'correct') {
+        requiredGreenLetters[position] = letterState.letter;
+      } else if (letterState.status === 'present') {
+        requiredYellowLetters.add(letterState.letter);
+      }
+    });
+  });
+
+  const guessArray = guess.toUpperCase().split('');
+  
+  // Check that all green letters are in correct positions
+  for (const [position, letter] of Object.entries(requiredGreenLetters)) {
+    const pos = parseInt(position);
+    if (guessArray[pos] !== letter) {
+      return { 
+        isValid: false, 
+        error: `Must use ${letter} in position ${pos + 1}` 
+      };
+    }
+  }
+
+  // Check that all yellow letters are included somewhere in the guess
+  for (const letter of requiredYellowLetters) {
+    if (!guessArray.includes(letter)) {
+      return { 
+        isValid: false, 
+        error: `Must include the letter ${letter}` 
+      };
+    }
+  }
+
+  return { isValid: true };
+}
+
 export function generateShareText(
   guesses: string[],
   word: string,

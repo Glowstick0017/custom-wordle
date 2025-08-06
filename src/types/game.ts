@@ -5,11 +5,13 @@ export interface GameState {
   gameStatus: 'playing' | 'won' | 'lost';
   maxGuesses: number;
   wordLength: number;
+  hardMode: boolean;
 }
 
 export interface CustomWordle {
   word: string;
   maxGuesses: number;
+  hardMode: boolean;
   createdAt: string;
 }
 

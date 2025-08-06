@@ -18,6 +18,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [word, setWord] = useState('');
   const [maxGuesses, setMaxGuesses] = useState(6);
   const [isInfinite, setIsInfinite] = useState(false);
+  const [hardMode, setHardMode] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -34,7 +35,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
     const wordleData = {
       word: word.toUpperCase(),
-      maxGuesses: isInfinite ? Infinity : maxGuesses
+      maxGuesses: isInfinite ? Infinity : maxGuesses,
+      hardMode: hardMode
     };
 
     const encrypted = encryptWordle(wordleData);
@@ -56,6 +58,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setWord('');
     setMaxGuesses(6);
     setIsInfinite(false);
+    setHardMode(false);
     setGeneratedLink('');
     setCopied(false);
     onClose();
@@ -64,7 +67,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const playNow = () => {
     const encrypted = encryptWordle({
       word: word.toUpperCase(),
-      maxGuesses: isInfinite ? Infinity : maxGuesses
+      maxGuesses: isInfinite ? Infinity : maxGuesses,
+      hardMode: hardMode
     });
     router.push(`/play?w=${encrypted}`);
     handleClose();
@@ -180,14 +184,39 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             </div>
           </div>
 
+          {/* Hard Mode Toggle */}
+          <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600/30 hover:bg-slate-700/40 transition-colors">
+            <div className="flex-1">
+              <label htmlFor="hardMode" className="block text-sm font-medium text-slate-300 cursor-pointer">
+                Hard Mode
+              </label>
+              <p className="text-xs text-slate-400 mt-1">
+                Any revealed hints must be used in subsequent guesses
+              </p>
+            </div>
+            
+            {/* Custom Toggle Switch */}
+            <label htmlFor="hardMode" className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                id="hardMode"
+                checked={hardMode}
+                onChange={(e) => setHardMode(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="relative w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 shadow-inner">
+              </div>
+            </label>
+          </div>
+
           {/* Create Button */}
-                      <button
-              onClick={handleCreateWordle}
-              disabled={!word || word.length < 1}
-              className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg"
-            >
-              Create Shareable Link
-            </button>
+          <button
+            onClick={handleCreateWordle}
+            disabled={!word || word.length < 1}
+            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg"
+          >
+            Create Shareable Link
+          </button>
         </div>
       ) : (
         /* Generated Link */
@@ -206,10 +235,16 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <span className="text-sm font-medium text-slate-300">Word:</span>
               <span className="font-mono font-bold text-emerald-400">{word.toUpperCase()}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-medium text-slate-300">Guesses:</span>
               <span className="font-bold text-emerald-400">
                 {isInfinite ? 'Unlimited' : maxGuesses}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-slate-300">Mode:</span>
+              <span className="font-bold text-emerald-400">
+                {hardMode ? 'Hard Mode' : 'Normal'}
               </span>
             </div>
           </div>

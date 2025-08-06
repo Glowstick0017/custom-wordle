@@ -11,7 +11,7 @@ import StatsModal from '@/components/StatsModal';
 import CreateModal from '@/components/CreateModal';
 import { useAlert } from '@/components/Alert';
 import { decryptWordle } from '@/utils/encryption';
-import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats } from '@/utils/gameLogic';
+import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats, validateHardModeGuess } from '@/utils/gameLogic';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
 
 function PlayGameContent() {
@@ -24,7 +24,8 @@ function PlayGameContent() {
     currentGuess: '',
     gameStatus: 'playing',
     maxGuesses: 6,
-    wordLength: 5
+    wordLength: 5,
+    hardMode: false
   });
   
   const [letterStates, setLetterStates] = useState<{ [key: string]: LetterState[] }>({});
@@ -45,7 +46,8 @@ function PlayGameContent() {
           ...prev,
           word: decrypted.word,
           maxGuesses: decrypted.maxGuesses,
-          wordLength: decrypted.word.length
+          wordLength: decrypted.word.length,
+          hardMode: decrypted.hardMode
         }));
         setGameLoaded(true);
       } else {
@@ -91,6 +93,16 @@ function PlayGameContent() {
     }
 
     const guess = gameState.currentGuess.toUpperCase();
+    
+    // Check hard mode validation
+    if (gameState.hardMode) {
+      const hardModeValidation = validateHardModeGuess(guess, gameState.guesses, gameState.word);
+      if (!hardModeValidation.isValid) {
+        showAlert(`Hard Mode: ${hardModeValidation.error}`, 'error');
+        return;
+      }
+    }
+    
     const newLetterStates = checkGuess(guess, gameState.word);
     const newGuesses = [...gameState.guesses, guess];
     
@@ -222,9 +234,29 @@ function PlayGameContent() {
           </Link>
           
           <div className="text-center">
-            <h1 className="text-xl font-bold text-white">Custom Wordle</h1>
+            <div className="flex items-center justify-center gap-3 mb-1">
+              <h1 className="text-xl font-bold text-white">Custom Wordle</h1>
+              {gameState.hardMode && (
+                <div className="relative">
+                  <div className="px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-lg border border-orange-400/50">
+                    <div className="flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      HARD MODE
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-full blur-sm opacity-30 -z-10"></div>
+                </div>
+              )}
+            </div>
             <p className="text-xs text-slate-400">
               {gameState.wordLength} letters • {gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses
+              {gameState.hardMode && (
+                <span className="block mt-1 text-orange-300/80 font-medium">
+                  Revealed hints must be used
+                </span>
+              )}
             </p>
           </div>
 

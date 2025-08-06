@@ -31,36 +31,54 @@ function vigenereCipher(text: string, key: string, encrypt: boolean = true): str
   return result.join('');
 }
 
-export function encryptWordle(wordle: { word: string; maxGuesses: number }): string {
+export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMode?: boolean }): string {
   const encryptedWord = vigenereCipher(wordle.word, CIPHER_KEY, true);
   
-  // Only include guess count if it's different from default (6)
-  if (wordle.maxGuesses === 6) {
-    return encryptedWord;
-  } else if (wordle.maxGuesses === Infinity) {
-    return `${encryptedWord}_inf`;
-  } else {
-    return `${encryptedWord}_${wordle.maxGuesses}`;
+  // Build suffix: guess count, then hard mode indicator
+  let suffix = '';
+  
+  // Add guess count if different from default (6)
+  if (wordle.maxGuesses !== 6) {
+    if (wordle.maxGuesses === Infinity) {
+      suffix += '_inf';
+    } else {
+      suffix += `_${wordle.maxGuesses}`;
+    }
   }
+  
+  // Add hard mode indicator if enabled
+  if (wordle.hardMode) {
+    suffix += '_h';
+  }
+  
+  return `${encryptedWord}${suffix}`;
 }
 
-export function decryptWordle(encryptedData: string): { word: string; maxGuesses: number } | null {
+export function decryptWordle(encryptedData: string): { word: string; maxGuesses: number; hardMode: boolean } | null {
   try {
     let encryptedWord: string;
     let maxGuesses: number = 6; // default
+    let hardMode: boolean = false; // default
     
-    // Check if there's a guess count suffix
+    // Parse suffixes if they exist
     if (encryptedData.includes('_')) {
       const parts = encryptedData.split('_');
       encryptedWord = parts[0];
-      const guessStr = parts[1];
       
-      if (guessStr === 'inf') {
-        maxGuesses = Infinity;
-      } else {
-        const parsed = parseInt(guessStr, 10);
-        if (!isNaN(parsed) && parsed >= 1) {
-          maxGuesses = parsed;
+      // Process each suffix part
+      for (let i = 1; i < parts.length; i++) {
+        const part = parts[i];
+        
+        if (part === 'inf') {
+          maxGuesses = Infinity;
+        } else if (part === 'h') {
+          hardMode = true;
+        } else {
+          // Try to parse as number
+          const parsed = parseInt(part, 10);
+          if (!isNaN(parsed) && parsed >= 1) {
+            maxGuesses = parsed;
+          }
         }
       }
     } else {
@@ -69,7 +87,7 @@ export function decryptWordle(encryptedData: string): { word: string; maxGuesses
     
     const word = vigenereCipher(encryptedWord, CIPHER_KEY, false);
     
-    return { word: word.toUpperCase(), maxGuesses };
+    return { word: word.toUpperCase(), maxGuesses, hardMode };
   } catch (error) {
     console.error('Failed to decrypt wordle:', error);
     return null;
