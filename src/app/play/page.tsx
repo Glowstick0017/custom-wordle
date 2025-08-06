@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Share2, BarChart3, RotateCcw, Plus } from 'lucide-react';
@@ -14,7 +14,7 @@ import { decryptWordle } from '@/utils/encryption';
 import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats } from '@/utils/gameLogic';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
 
-export default function PlayPage() {
+function PlayGameContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { showAlert, AlertComponent } = useAlert();
@@ -326,5 +326,24 @@ export default function PlayPage() {
       {/* Custom Alert */}
       <AlertComponent />
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400 mx-auto mb-4"></div>
+        <p className="text-slate-400">Loading game...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function PlayPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <PlayGameContent />
+    </Suspense>
   );
 } 
