@@ -182,7 +182,7 @@ export default function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps)
           <div className="bg-blue-900/30 border border-blue-400/30 rounded-lg p-4">
             <h4 className="text-sm font-bold text-blue-300 mb-2">🌟 Accessibility Mode Active</h4>
             <p className="text-xs text-white/80 leading-relaxed">
-              You're currently using high-contrast colors designed for better visibility. 
+              You&apos;re currently using high-contrast colors designed for better visibility. 
               Orange indicates correct letters, blue indicates letters in the wrong position, 
               and gray indicates letters not in the word.
             </p>
