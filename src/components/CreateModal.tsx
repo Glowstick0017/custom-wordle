@@ -361,7 +361,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 <div className="flex items-start gap-3">
                   <span className="text-sm font-medium text-white/70">Hint:</span>
                   <span className="font-medium text-cyan-400 text-sm italic">
-                    "{hint}"
+                    &ldquo;{hint}&rdquo;
                   </span>
                 </div>
               )}
