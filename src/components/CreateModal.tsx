@@ -310,7 +310,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                       onChange={(e) => setHardMode(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="relative w-10 h-6 glass-card peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-400/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 shadow-lg">
+                    <div className="relative w-11 h-6 bg-gray-200/20 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-400/20 rounded-full peer dark:bg-gray-700/50 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all duration-300 ease-in-out peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 shadow-lg">
                     </div>
                   </label>
                 </div>
