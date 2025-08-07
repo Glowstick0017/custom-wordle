@@ -41,6 +41,25 @@ button, [role="button"] {
 .keyboard-key {
   min-height: 48px;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* Mobile-specific keyboard improvements */
+@media (max-width: 640px) {
+  .keyboard-key {
+    min-height: 52px;
+    min-width: 32px;
+  }
+}
+
+/* Improve button touch feedback */
+.keyboard-key:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
 }
 
 /* Prevent text selection on keyboard */

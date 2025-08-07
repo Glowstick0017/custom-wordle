@@ -111,7 +111,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <label className="block text-sm font-medium text-white/90 mb-3">
               Your Word (1-30 letters)
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <input
                 type="text"
                 value={word}
@@ -124,20 +124,20 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 type="button"
                 onClick={getRandomWord}
                 disabled={isLoadingRandomWord}
-                className="px-4 py-4 glass-card glass-card-hover border border-white/20 rounded-xl transition-all duration-300 text-white/80 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2 whitespace-nowrap"
+                className="px-3 sm:px-4 py-4 glass-card glass-card-hover border border-white/20 rounded-xl transition-all duration-300 text-white/80 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-1 sm:gap-2 min-w-[44px] sm:min-w-auto"
                 title="Generate random word"
               >
                 {isLoadingRandomWord ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span className="text-sm font-medium">Loading...</span>
+                    <span className="text-sm font-medium hidden sm:inline">Loading...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    <span className="text-sm font-medium">Random</span>
+                    <span className="text-sm font-medium hidden sm:inline">Random</span>
                   </>
                 )}
               </button>

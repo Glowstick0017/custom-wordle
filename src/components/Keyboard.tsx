@@ -25,10 +25,12 @@ export default function Keyboard({
   const getKeyStyle = (key: string) => {
     const state = keyStates[key]?.status || 'unused';
     const baseStyle = `
-      flex-1 h-10 sm:h-14 rounded-lg font-bold text-xs sm:text-base
-      transition-all duration-200 active:scale-95
+      flex-1 h-12 sm:h-14 rounded-md font-bold text-sm sm:text-base
+      transition-all duration-150 active:scale-95 active:brightness-110
       flex items-center justify-center min-w-0 shadow-lg
-      min-h-[40px] sm:min-h-[48px] touch-manipulation
+      min-h-[48px] sm:min-h-[56px] touch-manipulation
+      border border-white/10 user-select-none
+      min-w-[32px] sm:min-w-[40px]
     `;
     
     if (disabled) {
@@ -37,24 +39,25 @@ export default function Keyboard({
     
     switch (state) {
       case 'correct':
-        return `${baseStyle} btn-gradient-primary text-white shadow-emerald-500/40`;
+        return `${baseStyle} btn-gradient-primary text-white shadow-emerald-500/40 border-emerald-400/30`;
       case 'present':
-        return `${baseStyle} bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40`;
+        return `${baseStyle} bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40 border-yellow-400/30`;
       case 'absent':
-        return `${baseStyle} glass-card text-white/60 shadow-black/20`;
+        return `${baseStyle} glass-card text-white/60 shadow-black/20 border-white/5`;
       default:
-        return `${baseStyle} glass-card glass-card-hover text-white`;
+        return `${baseStyle} glass-card glass-card-hover text-white border-white/15 hover:border-white/25`;
     }
   };
 
   const specialKeyStyle = `
-    h-10 sm:h-14 px-1 sm:px-4 rounded-lg font-bold text-xs sm:text-sm
-    transition-all duration-200 active:scale-95
+    h-12 sm:h-14 px-2 sm:px-4 rounded-md font-bold text-xs sm:text-sm
+    transition-all duration-150 active:scale-95 active:brightness-110
     flex items-center justify-center shadow-lg
-    min-h-[40px] sm:min-h-[48px] min-w-[40px] sm:min-w-[50px] touch-manipulation
+    min-h-[48px] sm:min-h-[56px] min-w-[52px] sm:min-w-[65px] touch-manipulation
+    border border-white/10 user-select-none
     ${disabled 
-      ? 'glass-card text-white/30 cursor-not-allowed' 
-      : 'btn-gradient-secondary text-white'
+      ? 'glass-card text-white/30 cursor-not-allowed border-white/5' 
+      : 'btn-gradient-secondary text-white border-orange-400/30 hover:border-orange-400/40'
     }
   `;
 
@@ -70,29 +73,31 @@ export default function Keyboard({
   );
 
   return (
-    <div className="w-full max-w-lg mx-auto p-1 sm:p-4 keyboard-container overflow-hidden">
-      {      /* Top row */}
-      <div className="flex gap-0.5 sm:gap-2 mb-1 sm:mb-2">
+    <div className="w-full max-w-lg mx-auto p-2 sm:p-4 keyboard-container">
+      {/* Top row - Q W E R T Y U I O P */}
+      <div className="flex gap-1 sm:gap-2 mb-2 sm:mb-3 justify-center">
         {topRow.map(renderKey)}
       </div>
       
-      {      /* Middle row */}
-      <div className="flex gap-0.5 sm:gap-2 mb-1 sm:mb-2 px-1 sm:px-4">
+      {/* Middle row - A S D F G H J K L (offset for natural keyboard feel) */}
+      <div className="flex gap-1 sm:gap-2 mb-2 sm:mb-3 justify-center px-3 sm:px-4">
         {middleRow.map(renderKey)}
       </div>
       
-      {      /* Bottom row */}
-      <div className="flex gap-0.5 sm:gap-2">
+      {/* Bottom row - ENTER Z X C V B N M DELETE */}
+      <div className="flex gap-1 sm:gap-2 justify-center">
         <button
           className={`${specialKeyStyle} keyboard-key`}
           onClick={() => !disabled && onEnter()}
           disabled={disabled}
+          aria-label="Enter"
         >
-          <CornerDownLeft size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline text-xs">ENTER</span>
+          <CornerDownLeft size={14} className="sm:mr-1" />
+          <span className="hidden sm:inline text-xs font-bold">ENTER</span>
+          <span className="sm:hidden text-xs font-bold">⏎</span>
         </button>
         
-        <div className="flex gap-0.5 sm:gap-2 flex-1">
+        <div className="flex gap-1 sm:gap-2 flex-1 justify-center">
           {bottomRow.map(renderKey)}
         </div>
         
@@ -100,9 +105,11 @@ export default function Keyboard({
           className={`${specialKeyStyle} keyboard-key`}
           onClick={() => !disabled && onBackspace()}
           disabled={disabled}
+          aria-label="Delete"
         >
-          <Delete size={16} className="sm:mr-1" />
-          <span className="hidden sm:inline text-xs">DEL</span>
+          <Delete size={14} className="sm:mr-1" />
+          <span className="hidden sm:inline text-xs font-bold">DEL</span>
+          <span className="sm:hidden text-xs font-bold">⌫</span>
         </button>
       </div>
     </div>

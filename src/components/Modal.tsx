@@ -22,9 +22,9 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       />
       
       {/* Modal */}
-      <div className="relative glass-card rounded-xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden border border-white/20">
+      <div className="relative glass-card rounded-xl shadow-2xl w-full max-w-lg mx-2 sm:mx-4 max-h-[90vh] overflow-hidden border border-white/20">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10 glass-card">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-white/10 glass-card">
           <h2 className="text-xl font-bold gradient-text">{title}</h2>
           <button
             onClick={onClose}
@@ -35,7 +35,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         </div>
         
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] text-white">
+        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-140px)] text-white">
           {children}
         </div>
       </div>
