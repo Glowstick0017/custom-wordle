@@ -20,42 +20,42 @@ export default function StatsModal({ isOpen, onClose, stats }: StatsModalProps) 
     <Modal isOpen={isOpen} onClose={onClose} title="Statistics">
       <div className="space-y-6">
         {/* Main Stats */}
-        <div className="grid grid-cols-4 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-emerald-400">{stats.gamesPlayed}</div>
-            <div className="text-xs text-slate-400">Played</div>
+        <div className="grid grid-cols-2 gap-4 text-center">
+          <div className="glass-card p-4 rounded-lg">
+            <div className="text-3xl font-bold gradient-text">{stats.gamesPlayed}</div>
+            <div className="text-xs text-white/70 mt-1">Games Played</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold text-emerald-400">{winPercentage}</div>
-            <div className="text-xs text-slate-400">Win %</div>
+          <div className="glass-card p-4 rounded-lg">
+            <div className="text-3xl font-bold gradient-text">{winPercentage}%</div>
+            <div className="text-xs text-white/70 mt-1">Win Rate</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold text-emerald-400">{stats.currentStreak}</div>
-            <div className="text-xs text-slate-400">Current Streak</div>
+          <div className="glass-card p-4 rounded-lg">
+            <div className="text-3xl font-bold text-emerald-400">{stats.currentStreak}</div>
+            <div className="text-xs text-white/70 mt-1">Current Streak</div>
           </div>
-          <div>
-            <div className="text-2xl font-bold text-emerald-400">{stats.maxStreak}</div>
-            <div className="text-xs text-slate-400">Max Streak</div>
+          <div className="glass-card p-4 rounded-lg">
+            <div className="text-3xl font-bold text-purple-400">{stats.maxStreak}</div>
+            <div className="text-xs text-white/70 mt-1">Best Streak</div>
           </div>
         </div>
 
         {/* Guess Distribution */}
         {Object.keys(stats.guessDistribution).length > 0 && (
-          <div>
-            <h3 className="font-bold mb-3 text-emerald-400">Guess Distribution</h3>
-            <div className="space-y-1">
+          <div className="glass-card p-4 rounded-lg">
+            <h3 className="font-bold mb-4 gradient-text text-lg">Guess Distribution</h3>
+            <div className="space-y-2">
               {Object.entries(stats.guessDistribution)
                 .sort(([a], [b]) => parseInt(a) - parseInt(b))
                 .map(([guesses, count]) => (
-                  <div key={guesses} className="flex items-center gap-2">
-                    <div className="w-4 text-sm text-slate-300">{guesses}</div>
-                    <div className="flex-1 bg-slate-700 rounded-sm h-5 relative">
+                  <div key={guesses} className="flex items-center gap-3">
+                    <div className="w-6 text-sm text-white/80 font-medium">{guesses}</div>
+                    <div className="flex-1 glass-card rounded-lg h-6 relative overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-full rounded-sm transition-all duration-500"
-                        style={{ width: `${(count / maxDistribution) * 100}%` }}
+                        className="btn-gradient-primary h-full rounded-lg transition-all duration-700 ease-out"
+                        style={{ width: `${Math.max((count / maxDistribution) * 100, 5)}%` }}
                       />
-                      <div className="absolute inset-0 flex items-center justify-end pr-2">
-                        <span className="text-xs font-bold text-white">{count}</span>
+                      <div className="absolute inset-0 flex items-center justify-end pr-3">
+                        <span className="text-xs font-bold text-white drop-shadow-lg">{count}</span>
                       </div>
                     </div>
                   </div>

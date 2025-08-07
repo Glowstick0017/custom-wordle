@@ -19,6 +19,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [maxGuesses, setMaxGuesses] = useState(6);
   const [isInfinite, setIsInfinite] = useState(false);
   const [hardMode, setHardMode] = useState(false);
+  const [hint, setHint] = useState('');
+  const [isLoadingRandomWord, setIsLoadingRandomWord] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -36,7 +39,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     const wordleData = {
       word: word.toUpperCase(),
       maxGuesses: isInfinite ? Infinity : maxGuesses,
-      hardMode: hardMode
+      hardMode: hardMode,
+      hint: hint.trim() || undefined
     };
 
     const encrypted = encryptWordle(wordleData);
@@ -59,161 +63,266 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setMaxGuesses(6);
     setIsInfinite(false);
     setHardMode(false);
+    setHint('');
+    setIsLoadingRandomWord(false);
+    setShowAdvanced(false);
     setGeneratedLink('');
     setCopied(false);
     onClose();
+  };
+
+  const getRandomWord = async () => {
+    setIsLoadingRandomWord(true);
+    try {
+      const response = await fetch('https://raw.githubusercontent.com/tabatkins/wordle-list/refs/heads/main/words');
+      if (!response.ok) {
+        throw new Error('Failed to fetch word list');
+      }
+      const wordList = await response.text();
+      const words = wordList.trim().split(/\s+/);
+      const randomWord = words[Math.floor(Math.random() * words.length)];
+      setWord(randomWord.toUpperCase());
+    } catch (error) {
+      console.error('Error fetching random word:', error);
+      showAlert('Failed to fetch random word. Please try again.', 'error');
+    } finally {
+      setIsLoadingRandomWord(false);
+    }
   };
 
   const playNow = () => {
     const encrypted = encryptWordle({
       word: word.toUpperCase(),
       maxGuesses: isInfinite ? Infinity : maxGuesses,
-      hardMode: hardMode
+      hardMode: hardMode,
+      hint: hint.trim() || undefined
     });
     router.push(`/play?w=${encrypted}`);
     handleClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Create Custom Wordle">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Create Custom Glowdle">
       {!generatedLink ? (
         /* Creation Form */
         <div className="space-y-6">
           {/* Word Input */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-white/90 mb-3">
               Your Word (1-30 letters)
             </label>
-            <input
-              type="text"
-              value={word}
-              onChange={(e) => setWord(e.target.value.replace(/[^A-Za-z]/g, '').slice(0, 30))}
-              className="w-full px-4 py-3 border border-slate-600 bg-slate-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-lg font-mono uppercase text-white placeholder-slate-400"
-              placeholder="HELLO"
-              maxLength={30}
-            />
-            <p className="text-xs text-slate-400 mt-1">
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={word}
+                onChange={(e) => setWord(e.target.value.replace(/[^A-Za-z]/g, '').slice(0, 30))}
+                className="flex-1 px-4 py-4 glass-card border border-white/20 rounded-xl focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 text-lg font-mono uppercase text-white placeholder-white/50 transition-all duration-300"
+                placeholder="HELLO"
+                maxLength={30}
+              />
+              <button
+                type="button"
+                onClick={getRandomWord}
+                disabled={isLoadingRandomWord}
+                className="px-4 py-4 glass-card glass-card-hover border border-white/20 rounded-xl transition-all duration-300 text-white/80 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2 whitespace-nowrap"
+                title="Generate random word"
+              >
+                {isLoadingRandomWord ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span className="text-sm font-medium">Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span className="text-sm font-medium">Random</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-white/60 mt-2">
               {word.length}/30 characters
             </p>
           </div>
 
-          {/* Max Guesses */}
+          {/* Advanced Settings Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Maximum Guesses
-            </label>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="limited"
-                    name="guessType"
-                    checked={!isInfinite}
-                    onChange={() => setIsInfinite(false)}
-                    className="mr-2"
-                  />
-                  <label htmlFor="limited" className="text-slate-300">
-                    Limited guesses
-                  </label>
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="infinite"
-                    name="guessType"
-                    checked={isInfinite}
-                    onChange={() => setIsInfinite(true)}
-                    className="mr-2"
-                  />
-                  <label htmlFor="infinite" className="text-slate-300">
-                    Unlimited guesses
-                  </label>
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full flex items-center justify-between p-4 glass-card glass-card-hover rounded-xl border border-white/20 transition-all duration-300"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⚙️</span>
+                <div className="text-left">
+                  <div className="text-sm font-medium text-white/90">Advanced Settings</div>
+                  <div className="text-xs text-white/60">
+                    {isInfinite ? 'Unlimited' : `${maxGuesses}`} guesses
+                    {hardMode && ', Hard Mode'}
+                    {hint && ', Custom hint'}
+                  </div>
                 </div>
               </div>
-              
-              {!isInfinite && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <label className="block text-sm text-slate-300 mb-3">
-                      Number of guesses:
-                    </label>
-                    
-                    <div className="flex items-center justify-center gap-4">
-                      {/* Down Arrow Button */}
+              <svg 
+                className={`w-5 h-5 text-white/60 transition-transform duration-300 ${showAdvanced ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {showAdvanced && (
+              <div className="mt-4 space-y-6 glass-card p-4 rounded-xl border border-white/20">
+                {/* Max Guesses */}
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-3">
+                    Maximum Guesses
+                  </label>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() => setMaxGuesses(Math.max(1, maxGuesses - 1))}
-                        disabled={maxGuesses <= 1}
-                        className="w-12 h-12 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed border border-slate-600 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-                        title="Decrease guesses"
+                        onClick={() => setIsInfinite(false)}
+                        className={`relative overflow-hidden p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                          !isInfinite 
+                            ? 'border-emerald-400 bg-gradient-to-br from-emerald-500/30 to-emerald-600/20 shadow-xl shadow-emerald-500/40 ring-2 ring-emerald-400/50' 
+                            : 'border-white/20 glass-card hover:border-white/40'
+                        }`}
                       >
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                        </svg>
+                        {!isInfinite && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-emerald-600/10 animate-pulse"></div>
+                        )}
+                        <div className="relative text-center">
+                          <div className={`text-2xl mb-2 transition-all duration-300 ${!isInfinite ? 'text-emerald-300 animate-pulse' : 'text-white/60'}`}>
+                            🎯
+                          </div>
+                          <div className={`text-sm font-bold transition-all duration-300 ${!isInfinite ? 'text-white gradient-text' : 'text-white/70'}`}>
+                            Limited
+                          </div>
+                          {!isInfinite && (
+                            <div className="mt-1 text-xs text-emerald-300 font-medium">
+                              ✓ Selected
+                            </div>
+                          )}
+                        </div>
                       </button>
                       
-                      {/* Number Display */}
-                      <div className="bg-slate-800 border border-slate-600 rounded-lg px-6 py-3 min-w-[80px]">
-                        <span className="text-3xl font-bold text-emerald-400">{maxGuesses}</span>
-                      </div>
-                      
-                      {/* Up Arrow Button */}
                       <button
                         type="button"
-                        onClick={() => setMaxGuesses(Math.min(999, maxGuesses + 1))}
-                        disabled={maxGuesses >= 999}
-                        className="w-12 h-12 flex items-center justify-center bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed border border-slate-600 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
-                        title="Increase guesses"
+                        onClick={() => setIsInfinite(true)}
+                        className={`relative overflow-hidden p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                          isInfinite 
+                            ? 'border-purple-400 bg-gradient-to-br from-purple-500/30 to-purple-600/20 shadow-xl shadow-purple-500/40 ring-2 ring-purple-400/50' 
+                            : 'border-white/20 glass-card hover:border-white/40'
+                        }`}
                       >
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
+                        {isInfinite && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-purple-600/10 animate-pulse"></div>
+                        )}
+                        <div className="relative text-center">
+                          <div className={`text-2xl mb-2 transition-all duration-300 ${isInfinite ? 'text-purple-300 animate-pulse' : 'text-white/60'}`}>
+                            ∞
+                          </div>
+                          <div className={`text-sm font-bold transition-all duration-300 ${isInfinite ? 'text-white gradient-text' : 'text-white/70'}`}>
+                            Unlimited
+                          </div>
+                          {isInfinite && (
+                            <div className="mt-1 text-xs text-purple-300 font-medium">
+                              ✓ Selected
+                            </div>
+                          )}
+                        </div>
                       </button>
                     </div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <span className="text-sm text-slate-400">
-                      {maxGuesses === 1 ? '1 guess' : `${maxGuesses} guesses`}
-                    </span>
+                    
+                    {!isInfinite && (
+                      <div className="glass-card p-3 rounded-lg space-y-3">
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setMaxGuesses(Math.max(1, maxGuesses - 1))}
+                            disabled={maxGuesses <= 1}
+                            className="w-8 h-8 flex items-center justify-center glass-card glass-card-hover border border-white/20 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                          >
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                            </svg>
+                          </button>
+                          
+                          <div className="glass-card border border-white/20 rounded-lg px-4 py-2 min-w-[60px] text-center">
+                            <span className="text-2xl font-bold gradient-text">{maxGuesses}</span>
+                          </div>
+                          
+                          <button
+                            type="button"
+                            onClick={() => setMaxGuesses(Math.min(999, maxGuesses + 1))}
+                            disabled={maxGuesses >= 999}
+                            className="w-8 h-8 flex items-center justify-center glass-card glass-card-hover border border-white/20 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                          >
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* Hard Mode Toggle */}
-          <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600/30 hover:bg-slate-700/40 transition-colors">
-            <div className="flex-1">
-              <label htmlFor="hardMode" className="block text-sm font-medium text-slate-300 cursor-pointer">
-                Hard Mode
-              </label>
-              <p className="text-xs text-slate-400 mt-1">
-                Any revealed hints must be used in subsequent guesses
-              </p>
-            </div>
-            
-            {/* Custom Toggle Switch */}
-            <label htmlFor="hardMode" className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                id="hardMode"
-                checked={hardMode}
-                onChange={(e) => setHardMode(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="relative w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 shadow-inner">
+                {/* Hint */}
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-3">
+                    Hint (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={hint}
+                    onChange={(e) => setHint(e.target.value.slice(0, 100))}
+                    className="w-full px-4 py-3 glass-card border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500/50 focus:border-purple-400 text-white placeholder-white/50 transition-all duration-300"
+                    placeholder="Give players a helpful hint..."
+                    maxLength={100}
+                  />
+                  <p className="text-xs text-white/60 mt-2">
+                    {hint.length}/100 characters
+                  </p>
+                </div>
+
+                {/* Hard Mode Toggle */}
+                <div className="flex items-center justify-between p-3 glass-card rounded-lg border border-white/20">
+                  <div className="flex-1">
+                    <label htmlFor="hardMode" className="block text-sm font-medium text-white/90 cursor-pointer">
+                      Hard Mode
+                    </label>
+                    <p className="text-xs text-white/60 mt-1">
+                      Revealed hints must be used in subsequent guesses
+                    </p>
+                  </div>
+                  
+                  <label htmlFor="hardMode" className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="hardMode"
+                      checked={hardMode}
+                      onChange={(e) => setHardMode(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="relative w-10 h-6 glass-card peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-400/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 shadow-lg">
+                    </div>
+                  </label>
+                </div>
               </div>
-            </label>
+            )}
           </div>
 
           {/* Create Button */}
           <button
             onClick={handleCreateWordle}
             disabled={!word || word.length < 1}
-            className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg"
+            className="w-full btn-gradient-primary text-white font-bold py-4 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             Create Shareable Link
           </button>
@@ -222,41 +331,51 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         /* Generated Link */
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-xl font-bold text-emerald-400 mb-2">
-              ✅ Wordle Created!
+            <h3 className="text-2xl font-bold gradient-text mb-3">
+              ✨ Glowdle Created!
             </h3>
-            <p className="text-slate-300">
-              Share this link with others to play your custom Wordle
+            <p className="text-white/80">
+              Share this link with others to play your custom Glowdle
             </p>
           </div>
 
-          <div className="bg-slate-700/50 p-4 rounded-lg border border-slate-600/30">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-slate-300">Word:</span>
-              <span className="font-mono font-bold text-emerald-400">{word.toUpperCase()}</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium text-slate-300">Guesses:</span>
-              <span className="font-bold text-emerald-400">
-                {isInfinite ? 'Unlimited' : maxGuesses}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-300">Mode:</span>
-              <span className="font-bold text-emerald-400">
-                {hardMode ? 'Hard Mode' : 'Normal'}
-              </span>
+          <div className="glass-card p-5 rounded-xl border border-white/20 border-gradient">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-white/70">Word:</span>
+                <span className="font-mono font-bold text-xl gradient-text">{word.toUpperCase()}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-white/70">Guesses:</span>
+                <span className="font-bold text-emerald-400">
+                  {isInfinite ? 'Unlimited ∞' : `${maxGuesses} attempts`}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-white/70">Mode:</span>
+                <span className={`font-bold ${hardMode ? 'text-orange-400' : 'text-purple-400'}`}>
+                  {hardMode ? 'Hard Mode 🔥' : 'Normal Mode'}
+                </span>
+              </div>
+              {hint && (
+                <div className="flex items-start gap-3">
+                  <span className="text-sm font-medium text-white/70">Hint:</span>
+                  <span className="font-medium text-cyan-400 text-sm italic">
+                    "{hint}"
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="bg-slate-700/70 p-3 rounded-lg break-all text-sm font-mono text-slate-300 border border-slate-600/30">
+          <div className="space-y-4">
+            <div className="glass-card p-4 rounded-xl break-all text-sm font-mono text-white/90 border border-white/20">
               {generatedLink}
             </div>
             
             <button
               onClick={copyToClipboard}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg"
+              className="w-full btn-gradient-secondary text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-3"
             >
               {copied ? (
                 <>
@@ -273,23 +392,27 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           </div>
 
           <div className="flex gap-3">
-                          <button
-                onClick={() => {
-                  setWord('');
-                  setMaxGuesses(6);
-                  setIsInfinite(false);
-                  setGeneratedLink('');
-                  setCopied(false);
-                }}
-                className="flex-1 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg"
-              >
-                Create Another
-              </button>
-              
-              <button
-                onClick={playNow}
-                className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
-              >
+            <button
+              onClick={() => {
+                setWord('');
+                setMaxGuesses(6);
+                setIsInfinite(false);
+                setHardMode(false);
+                setHint('');
+                setIsLoadingRandomWord(false);
+                setShowAdvanced(false);
+                setGeneratedLink('');
+                setCopied(false);
+              }}
+              className="flex-1 glass-card glass-card-hover text-white font-bold py-4 px-4 rounded-xl transition-all duration-300"
+            >
+              Create Another
+            </button>
+            
+            <button
+              onClick={playNow}
+              className="flex-1 btn-gradient-primary text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2"
+            >
               <Play size={16} />
               Play Now
             </button>

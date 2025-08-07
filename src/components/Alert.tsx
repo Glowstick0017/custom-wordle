@@ -38,13 +38,13 @@ export default function Alert({ message, type, isOpen, onClose, duration = 4000 
   const getAlertStyles = () => {
     switch (type) {
       case 'success':
-        return 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300';
+        return 'border-emerald-400/60 glass-card text-emerald-200';
       case 'error':
-        return 'border-red-500/50 bg-red-500/10 text-red-300';
+        return 'border-red-400/60 glass-card text-red-200';
       case 'info':
-        return 'border-blue-500/50 bg-blue-500/10 text-blue-300';
+        return 'border-blue-400/60 glass-card text-blue-200';
       default:
-        return 'border-slate-500/50 bg-slate-500/10 text-slate-300';
+        return 'border-white/30 glass-card text-white/90';
     }
   };
 
@@ -78,7 +78,7 @@ export default function Alert({ message, type, isOpen, onClose, duration = 4000 
       <div
         className={`
           ${getAlertStyles()}
-          border-2 rounded-lg p-4 shadow-2xl backdrop-blur-sm
+          border-2 rounded-xl p-4 shadow-2xl
           transform transition-all duration-300 ease-in-out
           ${isVisible ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-4 opacity-0 scale-95'}
         `}
@@ -94,7 +94,7 @@ export default function Alert({ message, type, isOpen, onClose, duration = 4000 
           
           <button
             onClick={handleClose}
-            className="flex-shrink-0 p-1 rounded-full hover:bg-white/10 transition-colors duration-200"
+            className="flex-shrink-0 p-1 rounded-full hover:bg-white/10 transition-colors duration-200 flex items-center justify-center"
             aria-label="Close alert"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

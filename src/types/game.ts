@@ -6,6 +6,7 @@ export interface GameState {
   maxGuesses: number;
   wordLength: number;
   hardMode: boolean;
+  hint?: string;
 }
 
 export interface CustomWordle {

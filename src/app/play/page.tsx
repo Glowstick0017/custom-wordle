@@ -25,7 +25,8 @@ function PlayGameContent() {
     gameStatus: 'playing',
     maxGuesses: 6,
     wordLength: 5,
-    hardMode: false
+    hardMode: false,
+    hint: undefined
   });
   
   const [letterStates, setLetterStates] = useState<{ [key: string]: LetterState[] }>({});
@@ -47,7 +48,8 @@ function PlayGameContent() {
           word: decrypted.word,
           maxGuesses: decrypted.maxGuesses,
           wordLength: decrypted.word.length,
-          hardMode: decrypted.hardMode
+          hardMode: decrypted.hardMode,
+          hint: decrypted.hint
         }));
         setGameLoaded(true);
       } else {
@@ -193,10 +195,15 @@ function PlayGameContent() {
 
   if (!gameLoaded) {
     return (
-              <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-400 mx-auto mb-4"></div>
-          <p className="text-slate-300">Loading game...</p>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
+        <div className="absolute top-60 left-1/3 w-28 h-28 bg-gradient-to-r from-cyan-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
+        <div className="absolute bottom-40 right-1/4 w-24 h-24 bg-gradient-to-r from-pink-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+        <div className="absolute top-10 right-1/3 w-20 h-20 bg-gradient-to-r from-orange-500/22 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
+        <div className="text-center glass-card p-8 rounded-xl relative z-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-transparent border-t-emerald-400 border-r-purple-400 border-b-orange-400 mx-auto mb-4"></div>
+          <p className="text-white/90 text-lg">Loading game...</p>
         </div>
       </div>
     );
@@ -204,17 +211,22 @@ function PlayGameContent() {
 
   if (!gameState.word) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6">
-          <h1 className="text-2xl font-bold text-white">No Game Found</h1>
-          <p className="text-slate-300">
-            This page requires a valid game link. Create a new custom Wordle to get started.
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
+        <div className="absolute top-60 right-1/4 w-28 h-28 bg-gradient-to-r from-teal-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
+        <div className="absolute bottom-40 left-1/3 w-24 h-24 bg-gradient-to-r from-indigo-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+        <div className="absolute top-10 left-1/4 w-36 h-36 bg-gradient-to-r from-cyan-500/12 to-transparent rounded-full blur-xl animate-pulse delay-800"></div>
+        <div className="max-w-md w-full text-center space-y-6 glass-card p-8 rounded-xl relative z-10">
+          <h1 className="text-3xl font-bold gradient-text">No Game Found</h1>
+          <p className="text-white/80 text-lg">
+            This page requires a valid game link. Create a new custom Glowdle to get started.
           </p>
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-block bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg"
+            className="btn-gradient-primary text-white font-bold py-4 px-8 rounded-xl"
           >
-            Create Custom Wordle
+            Create Custom Glowdle
           </button>
         </div>
       </div>
@@ -222,23 +234,35 @@ function PlayGameContent() {
   }
 
   return (
-    <div className="min-h-screen h-screen flex flex-col max-w-screen overflow-x-hidden">
+    <div className="min-h-screen h-screen flex flex-col max-w-screen overflow-x-hidden relative">
+      {/* Background gradient orbs */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-40 left-10 w-32 h-32 bg-gradient-to-r from-purple-500/10 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 right-20 w-24 h-24 bg-gradient-to-r from-orange-500/10 to-transparent rounded-full blur-xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-1/3 w-36 h-36 bg-gradient-to-r from-cyan-500/8 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
+        <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-gradient-to-r from-pink-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1500"></div>
+        <div className="absolute top-3/4 left-20 w-20 h-20 bg-gradient-to-r from-indigo-500/12 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
+        <div className="absolute top-60 right-5 w-16 h-16 bg-gradient-to-r from-teal-500/10 to-transparent rounded-full blur-xl animate-pulse delay-2000"></div>
+        <div className="absolute bottom-60 left-5 w-22 h-22 bg-gradient-to-r from-violet-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+      </div>
+
       {/* Header */}
-      <header className="flex-shrink-0 bg-slate-800/70 backdrop-blur-sm border-b border-slate-600/30 p-4">
+      <header className="flex-shrink-0 glass-card border-b border-white/10 p-4 relative z-10">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <Link
             href="/"
-            className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+            className="p-3 glass-card glass-card-hover rounded-xl transition-all duration-300 text-white/80 hover:text-white"
           >
             <ArrowLeft size={20} />
           </Link>
           
           <div className="text-center">
             <div className="flex items-center justify-center gap-3 mb-1">
-              <h1 className="text-xl font-bold text-white">Custom Wordle</h1>
+              <h1 className="text-xl font-bold gradient-text">Glowdle</h1>
               {gameState.hardMode && (
                 <div className="relative">
-                  <div className="px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-lg border border-orange-400/50">
+                  <div className="px-3 py-1 btn-gradient-accent text-white text-xs font-bold rounded-full shadow-lg">
                     <div className="flex items-center gap-1">
                       <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -246,15 +270,19 @@ function PlayGameContent() {
                       HARD MODE
                     </div>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-full blur-sm opacity-30 -z-10"></div>
                 </div>
               )}
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-white/70">
               {gameState.wordLength} letters • {gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses
               {gameState.hardMode && (
-                <span className="block mt-1 text-orange-300/80 font-medium">
+                <span className="block mt-1 text-orange-300 font-medium">
                   Revealed hints must be used
+                </span>
+              )}
+              {gameState.hint && (
+                <span className="block mt-1 text-cyan-300 font-medium italic">
+                  💡 {gameState.hint}
                 </span>
               )}
             </p>
@@ -263,7 +291,7 @@ function PlayGameContent() {
           <div className="flex gap-2">
             <button
               onClick={() => setShowStats(true)}
-              className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+              className="p-3 glass-card glass-card-hover rounded-xl transition-all duration-300 text-white/80 hover:text-white"
             >
               <BarChart3 size={20} />
             </button>
@@ -300,31 +328,31 @@ function PlayGameContent() {
         onClose={() => setShowGameOver(false)}
         title={gameState.gameStatus === 'won' ? '🎉 Congratulations!' : '😔 Game Over'}
       >
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-6">
           <div>
             {gameState.gameStatus === 'won' ? (
-              <p>You guessed the word in {gameState.guesses.length} tries!</p>
+              <p className="text-white/90 text-lg">You guessed the word in {gameState.guesses.length} tries!</p>
             ) : (
               <div>
-                <p className="text-slate-300">The word was:</p>
-                <p className="text-2xl font-bold font-mono mt-2 text-emerald-400">{gameState.word}</p>
+                <p className="text-white/80">The word was:</p>
+                <p className="text-3xl font-bold font-mono mt-2 gradient-text">{gameState.word}</p>
               </div>
             )}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <button
               onClick={handleShare}
-              className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg"
+              className="w-full btn-gradient-primary text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-3"
             >
-              <Share2 size={16} />
+              <Share2 size={18} />
               Share Results
             </button>
             
             <div className="flex gap-3">
               <button
                 onClick={resetGame}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg"
+                className="flex-1 btn-gradient-secondary text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2"
               >
                 <RotateCcw size={16} />
                 Play Again
@@ -332,7 +360,7 @@ function PlayGameContent() {
               
               <button
                 onClick={() => setShowCreate(true)}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg"
+                className="flex-1 btn-gradient-accent text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2"
               >
                 <Plus size={16} />
                 Create New
@@ -363,10 +391,16 @@ function PlayGameContent() {
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400 mx-auto mb-4"></div>
-        <p className="text-slate-400">Loading game...</p>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
+      <div className="absolute top-60 left-1/2 w-28 h-28 bg-gradient-to-r from-cyan-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
+      <div className="absolute bottom-40 left-1/4 w-24 h-24 bg-gradient-to-r from-pink-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+      <div className="absolute top-10 right-1/4 w-20 h-20 bg-gradient-to-r from-orange-500/22 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
+      <div className="absolute bottom-60 right-1/3 w-36 h-36 bg-gradient-to-r from-indigo-500/12 to-transparent rounded-full blur-xl animate-pulse delay-1800"></div>
+      <div className="text-center glass-card p-8 rounded-xl relative z-10">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-emerald-400 border-r-purple-400 border-b-orange-400 mx-auto mb-4"></div>
+        <p className="text-white/90 text-xl">Loading game...</p>
       </div>
     </div>
   );

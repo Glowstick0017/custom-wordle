@@ -31,10 +31,10 @@ function vigenereCipher(text: string, key: string, encrypt: boolean = true): str
   return result.join('');
 }
 
-export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMode?: boolean }): string {
+export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMode?: boolean; hint?: string }): string {
   const encryptedWord = vigenereCipher(wordle.word, CIPHER_KEY, true);
   
-  // Build suffix: guess count, then hard mode indicator
+  // Build suffix: guess count, then hard mode indicator, then hint
   let suffix = '';
   
   // Add guess count if different from default (6)
@@ -51,14 +51,28 @@ export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMo
     suffix += '_h';
   }
   
+  // Add hint if provided (base64 encoded to handle special characters)
+  if (wordle.hint) {
+    const encodedHint = btoa(wordle.hint).replace(/[+/=]/g, (char) => {
+      switch (char) {
+        case '+': return '-';
+        case '/': return '_';
+        case '=': return '';
+        default: return char;
+      }
+    });
+    suffix += `_hint${encodedHint}`;
+  }
+  
   return `${encryptedWord}${suffix}`;
 }
 
-export function decryptWordle(encryptedData: string): { word: string; maxGuesses: number; hardMode: boolean } | null {
+export function decryptWordle(encryptedData: string): { word: string; maxGuesses: number; hardMode: boolean; hint?: string } | null {
   try {
     let encryptedWord: string;
     let maxGuesses: number = 6; // default
     let hardMode: boolean = false; // default
+    let hint: string | undefined = undefined; // default
     
     // Parse suffixes if they exist
     if (encryptedData.includes('_')) {
@@ -73,6 +87,24 @@ export function decryptWordle(encryptedData: string): { word: string; maxGuesses
           maxGuesses = Infinity;
         } else if (part === 'h') {
           hardMode = true;
+        } else if (part.startsWith('hint')) {
+          // Decode hint
+          try {
+            const encodedHint = part.substring(4); // Remove 'hint' prefix
+            // Restore base64 padding and characters
+            const base64Hint = encodedHint.replace(/[-_]/g, (char) => {
+              switch (char) {
+                case '-': return '+';
+                case '_': return '/';
+                default: return char;
+              }
+            });
+            // Add padding if needed
+            const paddedHint = base64Hint + '=='.substring(0, (4 - base64Hint.length % 4) % 4);
+            hint = atob(paddedHint);
+          } catch (e) {
+            console.warn('Failed to decode hint:', e);
+          }
         } else {
           // Try to parse as number
           const parsed = parseInt(part, 10);
@@ -87,9 +119,21 @@ export function decryptWordle(encryptedData: string): { word: string; maxGuesses
     
     const word = vigenereCipher(encryptedWord, CIPHER_KEY, false);
     
-    return { word: word.toUpperCase(), maxGuesses, hardMode };
+    const result: { word: string; maxGuesses: number; hardMode: boolean; hint?: string } = {
+      word: word.toUpperCase(),
+      maxGuesses,
+      hardMode
+    };
+    
+    if (hint) {
+      result.hint = hint;
+    }
+    
+    return result;
   } catch (error) {
     console.error('Failed to decrypt wordle:', error);
     return null;
   }
-} 
+}
+
+ 

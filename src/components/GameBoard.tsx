@@ -32,16 +32,16 @@ export default function GameBoard({
     if (currentRowRef.current && scrollContainerRef.current && needsVerticalScroll) {
       const currentRow = currentRowRef.current;
       
-      // Only scroll if we have many rows and are actively playing
-      if (guesses.length >= 6) {
+      // Scroll when we have enough rows and are actively playing
+      if (guesses.length >= 5) {
         // Small delay to ensure the DOM has updated
         setTimeout(() => {
           currentRow.scrollIntoView({
             behavior: 'smooth',
-            block: 'end',
+            block: 'center',
             inline: 'nearest'
           });
-        }, 50);
+        }, 100);
       }
     }
   }, [guesses.length, currentGuess, needsVerticalScroll]);
@@ -110,22 +110,22 @@ export default function GameBoard({
 
   const getLetterStyle = (state: string, letter: string, isCurrentRow: boolean) => {
     if (!letter) {
-      return 'border-slate-600 bg-slate-800/50 text-slate-400';
+      return 'border-white/20 glass-card text-white/50';
     }
     
     if (isCurrentRow) {
-      return 'border-slate-600 bg-slate-700/70 text-white';
+      return 'border-white/40 glass-card text-white';
     }
     
     switch (state) {
       case 'correct':
-        return 'border-emerald-500 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30';
+        return 'border-emerald-400 btn-gradient-primary text-white shadow-lg shadow-emerald-500/40';
       case 'present':
-        return 'border-amber-500 bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/30';
+        return 'border-yellow-400 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40';
       case 'absent':
-        return 'border-slate-500 bg-gradient-to-br from-slate-600 to-slate-700 text-white shadow-lg shadow-slate-500/20';
+        return 'border-white/30 glass-card text-white/70 shadow-lg shadow-black/20';
       default:
-        return 'border-slate-600 bg-slate-800/50 text-slate-400';
+        return 'border-white/20 glass-card text-white/50';
     }
   };
 
@@ -142,17 +142,38 @@ export default function GameBoard({
     rows.push(renderRow(currentGuess, true, guesses.length));
   }
   
-  // Calculate if we need scrolling
+  // Calculate if we need scrolling and progressive row display
   const currentRowOffset = isGameActive ? 1 : 0;
   const needsHorizontalScroll = wordLength > 15;
+  const currentProgress = guesses.length + currentRowOffset;
   
-  // Add empty rows - limit to prevent infinite rows
-  const remainingRows = Math.max(0, safeMaxGuesses - guesses.length - currentRowOffset);
-  const maxDisplayRows = needsVerticalScroll ? Math.min(remainingRows, 20) : Math.min(remainingRows, 8);
+  // Progressive row display logic
+  let maxVisibleRows;
+  if (safeMaxGuesses <= 6) {
+    // For 6 or fewer guesses, show all rows
+    maxVisibleRows = safeMaxGuesses;
+  } else {
+    // For more than 6 guesses, show progressively
+    if (currentProgress <= 5) {
+      maxVisibleRows = 6; // Start with 6 rows
+    } else if (currentProgress <= safeMaxGuesses - 1) {
+      maxVisibleRows = currentProgress + 1; // Show current + 1 ahead
+    } else {
+      maxVisibleRows = safeMaxGuesses; // Show all when at the end
+    }
+  }
   
-  for (let i = 0; i < maxDisplayRows && i < remainingRows && rows.length < 100; i++) {
+  // Add empty rows up to the visible limit
+  const remainingRows = Math.max(0, maxVisibleRows - guesses.length - currentRowOffset);
+  
+  for (let i = 0; i < remainingRows && guesses.length + i + currentRowOffset < maxVisibleRows; i++) {
     rows.push(renderRow('', false, guesses.length + i + currentRowOffset));
   }
+  
+  // Show indicator if there are more rows available
+  const isInfiniteGuesses = maxGuesses === Infinity;
+  const hasMoreRows = isInfiniteGuesses || safeMaxGuesses > maxVisibleRows;
+  const remainingGuesses = isInfiniteGuesses ? Infinity : safeMaxGuesses - maxVisibleRows;
 
   const getContainerSize = (length: number) => {
     if (length <= 3) return 'max-w-xs sm:max-w-sm md:max-w-md';
@@ -162,11 +183,14 @@ export default function GameBoard({
     return 'max-w-full';
   };
 
+  // Update vertical scroll detection based on visible rows
+  const needsVerticalScrollNow = maxVisibleRows > 8;
+
   return (
     <div className="w-full h-full flex items-center justify-center p-1 sm:p-2 overflow-hidden">
       <div className={`w-full ${getContainerSize(wordLength)} h-full max-h-full overflow-hidden`}>
-        {needsVerticalScroll ? (
-          // Scrollable container for many rows
+        {needsVerticalScrollNow ? (
+          // Scrollable container for many visible rows
           <div 
             ref={scrollContainerRef}
             className={`
@@ -180,17 +204,55 @@ export default function GameBoard({
               ${needsHorizontalScroll ? 'min-w-max' : ''}
             `}>
               {rows}
+              {hasMoreRows && (
+                <div className="flex justify-center mt-4 mb-2">
+                  <div className="glass-card px-4 py-2 rounded-full border border-white/20">
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <div className="flex gap-1">
+                        <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse"></div>
+                        <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-100"></div>
+                        <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-200"></div>
+                      </div>
+                      <span>
+                        {isInfiniteGuesses 
+                          ? 'infinite more guesses available' 
+                          : `${remainingGuesses} more guess${remainingGuesses !== 1 ? 'es' : ''} available`
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
           // Centered container for few rows
           <div className={`
-            h-full flex items-center justify-center
+            h-full flex flex-col items-center justify-center
             ${needsHorizontalScroll ? 'overflow-x-auto game-board-scroll' : ''}
           `}>
             <div className={needsHorizontalScroll ? 'min-w-max px-2' : ''}>
               {rows}
             </div>
+            {hasMoreRows && (
+              <div className="mt-6">
+                <div className="glass-card px-4 py-2 rounded-full border border-white/20">
+                  <div className="flex items-center gap-2 text-white/60 text-sm">
+                    <div className="flex gap-1">
+                      <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse"></div>
+                      <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-100"></div>
+                      <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-200"></div>
+                    </div>
+                    <span>
+                      {isInfiniteGuesses 
+                        ? 'infinite more guesses available' 
+                        : `${remainingGuesses} more guess${remainingGuesses !== 1 ? 'es' : ''} available`
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
