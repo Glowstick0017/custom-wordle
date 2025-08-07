@@ -43,9 +43,9 @@ export default function Keyboard({
       case 'present':
         return `${baseStyle} bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40 border-yellow-400/30`;
       case 'absent':
-        return `${baseStyle} glass-card text-white/60 shadow-black/20 border-white/5`;
+        return `${baseStyle} bg-gray-900/80 text-gray-500/60 shadow-black/50 border-gray-700/30 brightness-50 opacity-60`;
       default:
-        return `${baseStyle} glass-card glass-card-hover text-white border-white/15 hover:border-white/25`;
+        return `${baseStyle} bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-sm text-white border-blue-400/30 hover:border-blue-300/50 hover:shadow-blue-400/30 hover:shadow-lg hover:from-blue-400/30 hover:to-purple-400/30 hover:brightness-110`;
     }
   };
 
