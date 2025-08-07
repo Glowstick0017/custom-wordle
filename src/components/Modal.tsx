@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import { ReactNode } from 'react';
+import { useAccessibility } from '@/contexts/AccessibilityContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -11,24 +12,42 @@ interface ModalProps {
 }
 
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  const { isAccessibilityMode } = useAccessibility();
+  
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black bg-opacity-80 transition-opacity backdrop-blur-md"
+        className={`absolute inset-0 bg-black bg-opacity-80 ${
+          isAccessibilityMode ? '' : 'transition-opacity backdrop-blur-md'
+        }`}
         onClick={onClose}
       />
       
       {/* Modal */}
-      <div className="relative glass-card rounded-xl shadow-2xl w-full max-w-lg mx-2 sm:mx-4 max-h-[90vh] overflow-hidden border border-white/20">
+      <div className={`relative rounded-xl w-full max-w-lg mx-2 sm:mx-4 max-h-[90vh] overflow-hidden ${
+        isAccessibilityMode 
+          ? 'bg-gray-800 border-2 border-white/40' 
+          : 'glass-card shadow-2xl border border-white/20'
+      }`} data-preserve-transitions>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-white/10 glass-card">
-          <h2 className="text-xl font-bold gradient-text">{title}</h2>
+        <div className={`flex items-center justify-between p-4 sm:p-6 border-b ${
+          isAccessibilityMode 
+            ? 'border-white/30 bg-gray-700' 
+            : 'border-white/10 glass-card'
+        }`}>
+          <h2 className={`text-xl font-bold ${
+            isAccessibilityMode ? 'text-white' : 'gradient-text'
+          }`}>{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 glass-card glass-card-hover rounded-lg transition-all duration-300 text-white/70 hover:text-white flex items-center justify-center"
+            className={`p-2 rounded-lg flex items-center justify-center ${
+              isAccessibilityMode
+                ? 'bg-gray-600 text-white hover:bg-gray-500 border-2 border-white/40'
+                : 'glass-card glass-card-hover transition-all duration-300 text-white/70 hover:text-white'
+            }`}
           >
             <X size={20} />
           </button>

@@ -6,6 +6,7 @@ import { Copy, Check, Play } from 'lucide-react';
 import Modal from './Modal';
 import { encryptWordle } from '@/utils/encryption';
 import { useAlert } from './Alert';
+import { useAccessibility } from '@/contexts/AccessibilityContext';
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface CreateModalProps {
 export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const router = useRouter();
   const { showAlert, AlertComponent } = useAlert();
+  const { isAccessibilityMode } = useAccessibility();
   const [word, setWord] = useState('');
   const [maxGuesses, setMaxGuesses] = useState(6);
   const [isInfinite, setIsInfinite] = useState(false);
@@ -187,24 +189,40 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                       <button
                         type="button"
                         onClick={() => setIsInfinite(false)}
-                        className={`relative overflow-hidden p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
-                          !isInfinite 
-                            ? 'border-emerald-400 bg-gradient-to-br from-emerald-500/30 to-emerald-600/20 shadow-xl shadow-emerald-500/40 ring-2 ring-emerald-400/50' 
-                            : 'border-white/20 glass-card hover:border-white/40'
+                        className={`relative p-4 rounded-xl border-2 ${
+                          isAccessibilityMode
+                            ? (!isInfinite 
+                              ? 'border-green-400 bg-green-600 text-white' 
+                              : 'border-gray-400 bg-gray-700 text-white hover:bg-gray-600')
+                            : `overflow-hidden transition-all duration-300 transform hover:scale-105 ${
+                              !isInfinite 
+                                ? 'border-emerald-400 bg-gradient-to-br from-emerald-500/30 to-emerald-600/20 shadow-xl shadow-emerald-500/40 ring-2 ring-emerald-400/50' 
+                                : 'border-white/20 glass-card hover:border-white/40'
+                            }`
                         }`}
                       >
-                        {!isInfinite && (
+                        {!isAccessibilityMode && !isInfinite && (
                           <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/10 to-emerald-600/10 animate-pulse"></div>
                         )}
                         <div className="relative text-center">
-                          <div className={`text-2xl mb-2 transition-all duration-300 ${!isInfinite ? 'text-emerald-300 animate-pulse' : 'text-white/60'}`}>
+                          <div className={`text-2xl mb-2 ${
+                            isAccessibilityMode 
+                              ? 'text-white' 
+                              : `transition-all duration-300 ${!isInfinite ? 'text-emerald-300 animate-pulse' : 'text-white/60'}`
+                          }`}>
                             🎯
                           </div>
-                          <div className={`text-sm font-bold transition-all duration-300 ${!isInfinite ? 'text-white gradient-text' : 'text-white/70'}`}>
+                          <div className={`text-sm font-bold ${
+                            isAccessibilityMode 
+                              ? 'text-white' 
+                              : `transition-all duration-300 ${!isInfinite ? 'text-white gradient-text' : 'text-white/70'}`
+                          }`}>
                             Limited
                           </div>
                           {!isInfinite && (
-                            <div className="mt-1 text-xs text-emerald-300 font-medium">
+                            <div className={`mt-1 text-xs font-medium ${
+                              isAccessibilityMode ? 'text-white' : 'text-emerald-300'
+                            }`}>
                               ✓ Selected
                             </div>
                           )}
@@ -214,24 +232,40 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                       <button
                         type="button"
                         onClick={() => setIsInfinite(true)}
-                        className={`relative overflow-hidden p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
-                          isInfinite 
-                            ? 'border-purple-400 bg-gradient-to-br from-purple-500/30 to-purple-600/20 shadow-xl shadow-purple-500/40 ring-2 ring-purple-400/50' 
-                            : 'border-white/20 glass-card hover:border-white/40'
+                        className={`relative p-4 rounded-xl border-2 ${
+                          isAccessibilityMode
+                            ? (isInfinite 
+                              ? 'border-purple-400 bg-purple-600 text-white' 
+                              : 'border-gray-400 bg-gray-700 text-white hover:bg-gray-600')
+                            : `overflow-hidden transition-all duration-300 transform hover:scale-105 ${
+                              isInfinite 
+                                ? 'border-purple-400 bg-gradient-to-br from-purple-500/30 to-purple-600/20 shadow-xl shadow-purple-500/40 ring-2 ring-purple-400/50' 
+                                : 'border-white/20 glass-card hover:border-white/40'
+                            }`
                         }`}
                       >
-                        {isInfinite && (
+                        {!isAccessibilityMode && isInfinite && (
                           <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-purple-600/10 animate-pulse"></div>
                         )}
                         <div className="relative text-center">
-                          <div className={`text-2xl mb-2 transition-all duration-300 ${isInfinite ? 'text-purple-300 animate-pulse' : 'text-white/60'}`}>
+                          <div className={`text-2xl mb-2 ${
+                            isAccessibilityMode 
+                              ? 'text-white' 
+                              : `transition-all duration-300 ${isInfinite ? 'text-purple-300 animate-pulse' : 'text-white/60'}`
+                          }`}>
                             ∞
                           </div>
-                          <div className={`text-sm font-bold transition-all duration-300 ${isInfinite ? 'text-white gradient-text' : 'text-white/70'}`}>
+                          <div className={`text-sm font-bold ${
+                            isAccessibilityMode 
+                              ? 'text-white' 
+                              : `transition-all duration-300 ${isInfinite ? 'text-white gradient-text' : 'text-white/70'}`
+                          }`}>
                             Unlimited
                           </div>
                           {isInfinite && (
-                            <div className="mt-1 text-xs text-purple-300 font-medium">
+                            <div className={`mt-1 text-xs font-medium ${
+                              isAccessibilityMode ? 'text-white' : 'text-purple-300'
+                            }`}>
                               ✓ Selected
                             </div>
                           )}
@@ -253,8 +287,14 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                             </svg>
                           </button>
                           
-                          <div className="glass-card border border-white/20 rounded-lg px-4 py-2 min-w-[60px] text-center">
-                            <span className="text-2xl font-bold gradient-text">{maxGuesses}</span>
+                          <div className={`border rounded-lg px-4 py-2 min-w-[60px] text-center ${
+                            isAccessibilityMode 
+                              ? 'border-white/40 bg-gray-700' 
+                              : 'glass-card border-white/20'
+                          }`}>
+                            <span className={`text-2xl font-bold ${
+                              isAccessibilityMode ? 'text-white' : 'gradient-text'
+                            }`}>{maxGuesses}</span>
                           </div>
                           
                           <button
@@ -292,7 +332,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 </div>
 
                 {/* Hard Mode Toggle */}
-                <div className="flex items-center justify-between p-3 glass-card rounded-lg border border-white/20">
+                <div className={`flex items-center justify-between p-3 rounded-lg border ${
+                  isAccessibilityMode 
+                    ? 'bg-gray-700 border-white/40' 
+                    : 'glass-card border-white/20'
+                }`}>
                   <div className="flex-1">
                     <label htmlFor="hardMode" className="block text-sm font-medium text-white/90 cursor-pointer">
                       Hard Mode
@@ -310,7 +354,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                       onChange={(e) => setHardMode(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="relative w-11 h-6 bg-gray-200/20 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-400/20 rounded-full peer dark:bg-gray-700/50 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all duration-300 ease-in-out peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 shadow-lg">
+                    <div className={`relative rounded-full peer peer-focus:outline-none ${
+                      isAccessibilityMode 
+                        ? `w-11 h-6 border-2 ${hardMode ? 'bg-orange-600 border-orange-400' : 'bg-gray-600 border-gray-400'} peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:shadow-sm`
+                        : 'w-11 h-6 bg-gray-200/20 peer-focus:ring-4 peer-focus:ring-orange-400/20 dark:bg-gray-700/50 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all duration-300 ease-in-out peer-checked:bg-gradient-to-r peer-checked:from-orange-500 peer-checked:to-orange-600 shadow-lg'
+                    }`}>
                     </div>
                   </label>
                 </div>
@@ -331,7 +379,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         /* Generated Link */
         <div className="space-y-6">
           <div className="text-center">
-            <h3 className="text-2xl font-bold gradient-text mb-3">
+            <h3 className={`text-2xl font-bold mb-3 ${
+              isAccessibilityMode ? 'text-white' : 'gradient-text'
+            }`}>
               ✨ Glowdle Created!
             </h3>
             <p className="text-white/80">
@@ -343,7 +393,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-white/70">Word:</span>
-                <span className="font-mono font-bold text-xl gradient-text">{word.toUpperCase()}</span>
+                <span className={`font-mono font-bold text-xl ${
+                  isAccessibilityMode ? 'text-white' : 'gradient-text'
+                }`}>{word.toUpperCase()}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-white/70">Guesses:</span>

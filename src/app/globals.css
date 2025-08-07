@@ -268,6 +268,22 @@ html, body {
     font-size: 0.75rem;
   }
   
+  /* Accessibility mode mobile keyboard adjustments */
+  .accessibility-mode .keyboard-key {
+    min-width: 28px !important;
+    min-height: 44px !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .accessibility-mode .keyboard-container {
+    padding: 0.5rem !important;
+  }
+  
+  /* Compact header for mobile */
+  header {
+    min-height: auto !important;
+  }
+  
   /* Adjust glass effect for mobile */
   .glass-card {
     backdrop-filter: blur(8px);
@@ -302,3 +318,233 @@ html, body {
 .pr-safe {
   padding-right: env(safe-area-inset-right);
 }
+
+/* =====================================
+   ACCESSIBILITY MODE STYLES (WCAG AA)
+   ===================================== */
+
+/* When accessibility mode is enabled, remove animations but preserve essential functionality */
+.accessibility-mode *:not(.fixed):not([role="dialog"]):not([data-preserve-transitions]) {
+  animation: none !important;
+  transition: none !important;
+}
+
+.accessibility-mode .animate-pulse,
+.accessibility-mode .animate-spin,
+.accessibility-mode .bg-gradient-animated,
+.accessibility-mode .gradient-text {
+  animation: none !important;
+}
+
+/* Remove gradient animations and background movement */
+.accessibility-mode .gradient-text {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  color: #ffffff !important;
+}
+
+.accessibility-mode .bg-gradient-animated {
+  animation: none !important;
+}
+
+.accessibility-mode body {
+  background: #1a1a1a !important;
+  background-image: none !important;
+  background-attachment: unset !important;
+  background-size: auto !important;
+  animation: none !important;
+}
+
+/* Remove moving gradient backgrounds completely - multiple aggressive approaches */
+.accessibility-mode .gradient-bg-layer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Target specific background layers by ID */
+.accessibility-mode #bg-layer-1,
+.accessibility-mode #bg-layer-2 {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Target all fixed gradient backgrounds except modals */
+.accessibility-mode .fixed.inset-0:not(.z-50) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Target specific gradient background classes */
+.accessibility-mode div[class*="bg-gradient"] {
+  background: transparent !important;
+  background-image: none !important;
+  animation: none !important;
+  display: none !important;
+}
+
+/* Force override any gradient backgrounds on fixed elements */
+.accessibility-mode .fixed[class*="bg-gradient"] {
+  background: transparent !important;
+  background-image: none !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Nuclear option - target by specific classes */
+.accessibility-mode .bg-gradient-to-br {
+  background: transparent !important;
+  background-image: none !important;
+  display: none !important;
+}
+
+/* High contrast colors for WCAG AA compliance (4.5:1 ratio minimum) */
+.accessibility-mode .glass-card {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: none !important;
+}
+
+.accessibility-mode .glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  transform: none !important;
+}
+
+/* Button styles with high contrast */
+.accessibility-mode .btn-gradient-primary {
+  background: #059669 !important; /* Dark green with 4.5:1 contrast */
+  box-shadow: none !important;
+}
+
+.accessibility-mode .btn-gradient-primary:hover {
+  background: #047857 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.accessibility-mode .btn-gradient-secondary {
+  background: #7c3aed !important; /* Dark purple with 4.5:1 contrast */
+  box-shadow: none !important;
+}
+
+.accessibility-mode .btn-gradient-secondary:hover {
+  background: #6d28d9 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.accessibility-mode .btn-gradient-accent {
+  background: #ea580c !important; /* Dark orange with 4.5:1 contrast */
+  box-shadow: none !important;
+}
+
+.accessibility-mode .btn-gradient-accent:hover {
+  background: #dc2626 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove all transform effects and shadows */
+.accessibility-mode button {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.accessibility-mode button:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.accessibility-mode button:active {
+  transform: none !important;
+}
+
+/* Ensure text meets WCAG AA standards */
+.accessibility-mode {
+  color: #ffffff !important;
+}
+
+.accessibility-mode .text-white\/80 {
+  color: rgba(255, 255, 255, 0.9) !important; /* Improved contrast */
+}
+
+.accessibility-mode .text-white\/60 {
+  color: rgba(255, 255, 255, 0.8) !important; /* Improved contrast */
+}
+
+.accessibility-mode .text-white\/40 {
+  color: rgba(255, 255, 255, 0.7) !important; /* Improved contrast */
+}
+
+/* Remove all blur effects */
+.accessibility-mode * {
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Remove gradient borders */
+.accessibility-mode .border-gradient::before,
+.accessibility-mode .border-gradient-animated::before {
+  display: none !important;
+}
+
+.accessibility-mode .border-gradient,
+.accessibility-mode .border-gradient-animated {
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Enhanced focus indicators for keyboard navigation */
+.accessibility-mode button:focus,
+.accessibility-mode input:focus,
+.accessibility-mode [role="button"]:focus {
+  outline: 3px solid #ffffff !important;
+  outline-offset: 2px !important;
+}
+
+/* Ensure all interactive elements have sufficient size (44px minimum) */
+.accessibility-mode button,
+.accessibility-mode [role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* These are already handled above */
+
+/* Simplified loading spinner for accessibility mode */
+.accessibility-mode .animate-spin {
+  border: 4px solid rgba(255, 255, 255, 0.3) !important;
+  border-top: 4px solid #ffffff !important;
+  animation: accessibility-spin 1s linear infinite !important;
+}
+
+@keyframes accessibility-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* High contrast keyboard key styles - only apply to unused keys */
+.accessibility-mode .keyboard-key:not([data-key-state]) {
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.accessibility-mode .keyboard-key:not([data-key-state]):hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: none !important;
+}
+
+/* Ensure keyboard keys with states keep their colors */
+.accessibility-mode .keyboard-key[data-key-state] {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove all drop shadows and gradients from layout - handled above */

@@ -3,13 +3,16 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Share2, BarChart3, RotateCcw, Plus } from 'lucide-react';
+import { ArrowLeft, Share2, BarChart3, RotateCcw, Plus, Info } from 'lucide-react';
 import GameBoard from '@/components/GameBoard';
 import Keyboard from '@/components/Keyboard';
 import Modal from '@/components/Modal';
 import StatsModal from '@/components/StatsModal';
 import CreateModal from '@/components/CreateModal';
+import HowToPlayModal from '@/components/HowToPlayModal';
+import AccessibilityToggle from '@/components/AccessibilityToggle';
 import { useAlert } from '@/components/Alert';
+import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { decryptWordle } from '@/utils/encryption';
 import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats, validateHardModeGuess } from '@/utils/gameLogic';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
@@ -18,6 +21,7 @@ function PlayGameContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { showAlert, AlertComponent } = useAlert();
+  const { isAccessibilityMode } = useAccessibility();
   const [gameState, setGameState] = useState<GameState>({
     word: '',
     guesses: [],
@@ -34,6 +38,7 @@ function PlayGameContent() {
   const [showGameOver, setShowGameOver] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [shareText, setShareText] = useState('');
   const [gameLoaded, setGameLoaded] = useState(false);
 
@@ -196,13 +201,21 @@ function PlayGameContent() {
   if (!gameLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
-        <div className="absolute top-60 left-1/3 w-28 h-28 bg-gradient-to-r from-cyan-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
-        <div className="absolute bottom-40 right-1/4 w-24 h-24 bg-gradient-to-r from-pink-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
-        <div className="absolute top-10 right-1/3 w-20 h-20 bg-gradient-to-r from-orange-500/22 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
+        {!isAccessibilityMode && (
+          <>
+            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
+            <div className="absolute top-60 left-1/3 w-28 h-28 bg-gradient-to-r from-cyan-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
+            <div className="absolute bottom-40 right-1/4 w-24 h-24 bg-gradient-to-r from-pink-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+            <div className="absolute top-10 right-1/3 w-20 h-20 bg-gradient-to-r from-orange-500/22 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
+          </>
+        )}
         <div className="text-center glass-card p-8 rounded-xl relative z-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-transparent border-t-emerald-400 border-r-purple-400 border-b-orange-400 mx-auto mb-4"></div>
+          <div className={`rounded-full h-12 w-12 border-4 border-transparent mx-auto mb-4 ${
+            isAccessibilityMode 
+              ? 'border-t-white animate-spin' 
+              : 'border-t-emerald-400 border-r-purple-400 border-b-orange-400 animate-spin'
+          }`}></div>
           <p className="text-white/90 text-lg">Loading game...</p>
         </div>
       </div>
@@ -212,13 +225,22 @@ function PlayGameContent() {
   if (!gameState.word) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
-        <div className="absolute top-60 right-1/4 w-28 h-28 bg-gradient-to-r from-teal-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
-        <div className="absolute bottom-40 left-1/3 w-24 h-24 bg-gradient-to-r from-indigo-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
-        <div className="absolute top-10 left-1/4 w-36 h-36 bg-gradient-to-r from-cyan-500/12 to-transparent rounded-full blur-xl animate-pulse delay-800"></div>
+        {/* Accessibility Toggle */}
+        <div className="absolute top-4 right-4 z-20">
+          <AccessibilityToggle />
+        </div>
+
+        {!isAccessibilityMode && (
+          <>
+            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
+            <div className="absolute top-60 right-1/4 w-28 h-28 bg-gradient-to-r from-teal-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
+            <div className="absolute bottom-40 left-1/3 w-24 h-24 bg-gradient-to-r from-indigo-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+            <div className="absolute top-10 left-1/4 w-36 h-36 bg-gradient-to-r from-cyan-500/12 to-transparent rounded-full blur-xl animate-pulse delay-800"></div>
+          </>
+        )}
         <div className="max-w-md w-full text-center space-y-6 glass-card p-8 rounded-xl relative z-10">
-          <h1 className="text-3xl font-bold gradient-text">No Game Found</h1>
+          <h1 className={`text-3xl font-bold ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>No Game Found</h1>
           <p className="text-white/80 text-lg">
             This page requires a valid game link. Create a new custom Glowdle to get started.
           </p>
@@ -235,66 +257,77 @@ function PlayGameContent() {
 
   return (
     <div className="min-h-screen h-screen flex flex-col max-w-screen overflow-x-hidden relative">
-      {/* Background gradient orbs */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-40 left-10 w-32 h-32 bg-gradient-to-r from-purple-500/10 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
-        <div className="absolute top-1/2 right-20 w-24 h-24 bg-gradient-to-r from-orange-500/10 to-transparent rounded-full blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute top-20 left-1/3 w-36 h-36 bg-gradient-to-r from-cyan-500/8 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
-        <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-gradient-to-r from-pink-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1500"></div>
-        <div className="absolute top-3/4 left-20 w-20 h-20 bg-gradient-to-r from-indigo-500/12 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
-        <div className="absolute top-60 right-5 w-16 h-16 bg-gradient-to-r from-teal-500/10 to-transparent rounded-full blur-xl animate-pulse delay-2000"></div>
-        <div className="absolute bottom-60 left-5 w-22 h-22 bg-gradient-to-r from-violet-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
-      </div>
+      {/* Background gradient orbs - hidden in accessibility mode */}
+      {!isAccessibilityMode && (
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-full blur-xl animate-pulse"></div>
+          <div className="absolute bottom-40 left-10 w-32 h-32 bg-gradient-to-r from-purple-500/10 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
+          <div className="absolute top-1/2 right-20 w-24 h-24 bg-gradient-to-r from-orange-500/10 to-transparent rounded-full blur-xl animate-pulse delay-1000"></div>
+          <div className="absolute top-20 left-1/3 w-36 h-36 bg-gradient-to-r from-cyan-500/8 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
+          <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-gradient-to-r from-pink-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1500"></div>
+          <div className="absolute top-3/4 left-20 w-20 h-20 bg-gradient-to-r from-indigo-500/12 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
+          <div className="absolute top-60 right-5 w-16 h-16 bg-gradient-to-r from-teal-500/10 to-transparent rounded-full blur-xl animate-pulse delay-2000"></div>
+          <div className="absolute bottom-60 left-5 w-22 h-22 bg-gradient-to-r from-violet-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+        </div>
+      )}
 
       {/* Header */}
-      <header className="flex-shrink-0 glass-card border-b border-white/10 p-4 relative z-10">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
-          <Link
-            href="/"
-            className="p-3 glass-card glass-card-hover rounded-xl transition-all duration-300 text-white/80 hover:text-white"
-          >
-            <ArrowLeft size={20} />
-          </Link>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-1">
-              <h1 className="text-xl font-bold gradient-text">Glowdle</h1>
-              {gameState.hardMode && (
-                <div className="relative">
-                  <div className="px-3 py-1 btn-gradient-accent text-white text-xs font-bold rounded-full shadow-lg">
-                    <div className="flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                      HARD MODE
+      <header className="flex-shrink-0 glass-card border-b border-white/10 p-2 sm:p-4 relative z-10">
+        <div className="max-w-lg mx-auto">
+          <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2 sm:gap-4">
+            {/* Left buttons */}
+            <div className="flex gap-1 sm:gap-2 shrink-0">
+              <Link
+                href="/"
+                className="p-2 sm:p-3 glass-card glass-card-hover rounded-lg sm:rounded-xl transition-all duration-300 text-white/80 hover:text-white flex items-center justify-center"
+              >
+                <ArrowLeft className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+              </Link>
+              <button
+                onClick={() => setShowHowToPlay(true)}
+                className="p-2 sm:p-3 glass-card glass-card-hover rounded-lg sm:rounded-xl transition-all duration-300 text-white/80 hover:text-white flex items-center justify-center"
+                title="How to Play"
+                aria-label="How to Play"
+              >
+                <Info className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+              </button>
+            </div>
+            
+            {/* Center content */}
+            <div className="text-center min-w-0">
+              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                <h1 className={`text-lg sm:text-xl font-bold ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>Glowdle</h1>
+                {gameState.hardMode && (
+                  <div className="px-1.5 py-0.5 sm:px-2 sm:py-1 btn-gradient-accent text-white text-xs font-bold rounded-full shadow-lg">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      🔥
+                      <span className="hidden sm:inline">HARD</span>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              
+              <div className="text-xs text-white/70 leading-tight sm:leading-relaxed space-y-0.5 sm:space-y-1">
+                <div>{gameState.wordLength} letters • {gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses</div>
+                {gameState.hardMode && (
+                  <div className="text-orange-300 font-medium">Revealed hints must be used</div>
+                )}
+                {gameState.hint && (
+                  <div className="text-cyan-300 font-medium italic break-words">💡 {gameState.hint}</div>
+                )}
+              </div>
             </div>
-            <p className="text-xs text-white/70">
-              {gameState.wordLength} letters • {gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses
-              {gameState.hardMode && (
-                <span className="block mt-1 text-orange-300 font-medium">
-                  Revealed hints must be used
-                </span>
-              )}
-              {gameState.hint && (
-                <span className="block mt-1 text-cyan-300 font-medium italic">
-                  💡 {gameState.hint}
-                </span>
-              )}
-            </p>
-          </div>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowStats(true)}
-              className="p-3 glass-card glass-card-hover rounded-xl transition-all duration-300 text-white/80 hover:text-white"
-            >
-              <BarChart3 size={20} />
-            </button>
+            {/* Right buttons */}
+            <div className="flex gap-1 sm:gap-2 shrink-0">
+              <AccessibilityToggle showText={false} />
+              <button
+                onClick={() => setShowStats(true)}
+                className="p-2 sm:p-3 glass-card glass-card-hover rounded-lg sm:rounded-xl transition-all duration-300 text-white/80 hover:text-white flex items-center justify-center"
+              >
+                <BarChart3 className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -335,7 +368,7 @@ function PlayGameContent() {
             ) : (
               <div>
                 <p className="text-white/80">The word was:</p>
-                <p className="text-3xl font-bold font-mono mt-2 gradient-text">{gameState.word}</p>
+                <p className={`text-3xl font-bold font-mono mt-2 ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>{gameState.word}</p>
               </div>
             )}
           </div>
@@ -383,6 +416,12 @@ function PlayGameContent() {
         onClose={() => setShowCreate(false)}
       />
 
+      {/* How to Play Modal */}
+      <HowToPlayModal
+        isOpen={showHowToPlay}
+        onClose={() => setShowHowToPlay(false)}
+      />
+
       {/* Custom Alert */}
       <AlertComponent />
     </div>
@@ -390,6 +429,7 @@ function PlayGameContent() {
 }
 
 function LoadingFallback() {
+  // Note: This component can't use useAccessibility because it's outside the provider
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>

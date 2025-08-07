@@ -2,6 +2,7 @@
 
 import { LetterState } from '@/types/game';
 import { useEffect, useRef } from 'react';
+import { useAccessibility } from '@/contexts/AccessibilityContext';
 
 interface GameBoardProps {
   guesses: string[];
@@ -20,6 +21,7 @@ export default function GameBoard({
   wordLength,
   letterStates
 }: GameBoardProps) {
+  const { isAccessibilityMode } = useAccessibility();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const currentRowRef = useRef<HTMLDivElement>(null);
   
@@ -110,11 +112,28 @@ export default function GameBoard({
 
   const getLetterStyle = (state: string, letter: string, isCurrentRow: boolean) => {
     if (!letter) {
-      return 'border-white/20 glass-card text-white/50';
+      return isAccessibilityMode 
+        ? 'border-white/40 bg-gray-800 text-white/70'
+        : 'border-white/20 glass-card text-white/50';
     }
     
     if (isCurrentRow) {
-      return 'border-white/40 glass-card text-white';
+      return isAccessibilityMode
+        ? 'border-white/60 bg-gray-700 text-white'
+        : 'border-white/40 glass-card text-white';
+    }
+    
+    if (isAccessibilityMode) {
+      switch (state) {
+        case 'correct':
+          return 'border-orange-400 bg-orange-600 text-white'; // High contrast orange
+        case 'present':
+          return 'border-blue-400 bg-blue-600 text-white'; // High contrast blue
+        case 'absent':
+          return 'border-gray-400 bg-gray-600 text-white'; // High contrast gray
+        default:
+          return 'border-white/40 bg-gray-800 text-white/70';
+      }
     }
     
     switch (state) {
