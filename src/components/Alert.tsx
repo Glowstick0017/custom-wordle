@@ -76,7 +76,7 @@ export default function Alert({ message, type, isOpen, onClose, duration = 4000,
   };
 
   return (
-    <div className={`${inModal ? 'fixed top-16 left-1/2 transform -translate-x-1/2 z-[60]' : 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50'} w-full max-w-md px-4`}>
+    <div className={`${inModal ? 'fixed top-16 left-1/2 transform -translate-x-1/2 z-[110]' : 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50'} w-full max-w-md px-4`}>
       <div
         className={`
           ${getAlertStyles()}

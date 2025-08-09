@@ -282,7 +282,7 @@ function PlayGameContent() {
       )}
 
       {/* Header */}
-      <header className="flex-shrink-0 glass-card border-b border-white/10 p-2 sm:p-4 relative z-10">
+      <header className="flex-shrink-0 glass-card border-b border-white/10 p-2 sm:p-4 relative z-0">
         <div className="max-w-lg mx-auto">
           <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2 sm:gap-4">
             {/* Left buttons */}

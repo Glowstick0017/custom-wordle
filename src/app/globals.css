@@ -373,7 +373,7 @@ html, body {
 }
 
 /* Target all fixed gradient backgrounds except modals */
-.accessibility-mode .fixed.inset-0:not(.z-50) {
+.accessibility-mode .fixed.inset-0:not(.z-\[100\]):not([role="dialog"]) {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -545,6 +545,13 @@ html, body {
 .accessibility-mode .keyboard-key[data-key-state] {
   transform: none !important;
   box-shadow: none !important;
+}
+
+/* Ensure modals are always visible in accessibility mode */
+.accessibility-mode [role="dialog"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Remove all drop shadows and gradients from layout - handled above */
