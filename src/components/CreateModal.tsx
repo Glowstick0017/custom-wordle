@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Copy, Check, Play } from 'lucide-react';
 import Modal from './Modal';
 import { encryptWordle } from '@/utils/encryption';
+import { validateRealWord } from '@/utils/gameLogic';
 import { useAlert } from './Alert';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 
@@ -15,19 +16,20 @@ interface CreateModalProps {
 
 export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const router = useRouter();
-  const { showAlert, AlertComponent } = useAlert();
+  const { showAlert, AlertComponent } = useAlert(true);
   const { isAccessibilityMode } = useAccessibility();
   const [word, setWord] = useState('');
   const [maxGuesses, setMaxGuesses] = useState(6);
   const [isInfinite, setIsInfinite] = useState(false);
   const [hardMode, setHardMode] = useState(false);
+  const [realWordsOnly, setRealWordsOnly] = useState(false);
   const [hint, setHint] = useState('');
   const [isLoadingRandomWord, setIsLoadingRandomWord] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const handleCreateWordle = () => {
+  const handleCreateWordle = async () => {
     if (!word || word.length < 1 || word.length > 30) {
       showAlert('Word must be between 1 and 30 letters', 'error');
       return;
@@ -38,10 +40,20 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       return;
     }
 
+    // Validate real word if setting is enabled
+    if (realWordsOnly) {
+      const validation = await validateRealWord(word);
+      if (!validation.isValid) {
+        showAlert(`${validation.error}. Please choose a real word or disable "Real Words Only".`, 'error');
+        return;
+      }
+    }
+
     const wordleData = {
       word: word.toUpperCase(),
       maxGuesses: isInfinite ? Infinity : maxGuesses,
       hardMode: hardMode,
+      realWordsOnly: realWordsOnly,
       hint: hint.trim() || undefined
     };
 
@@ -65,6 +77,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setMaxGuesses(6);
     setIsInfinite(false);
     setHardMode(false);
+    setRealWordsOnly(false);
     setHint('');
     setIsLoadingRandomWord(false);
     setShowAdvanced(false);
@@ -97,6 +110,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       word: word.toUpperCase(),
       maxGuesses: isInfinite ? Infinity : maxGuesses,
       hardMode: hardMode,
+      realWordsOnly: realWordsOnly,
       hint: hint.trim() || undefined
     });
     router.push(`/play?w=${encrypted}`);
@@ -163,6 +177,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   <div className="text-xs text-white/60">
                     {isInfinite ? 'Unlimited' : `${maxGuesses}`} guesses
                     {hardMode && ', Hard Mode'}
+                    {realWordsOnly && ', Real Words Only'}
                     {hint && ', Custom hint'}
                   </div>
                 </div>
@@ -362,6 +377,38 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     </div>
                   </label>
                 </div>
+
+                {/* Real Words Only Toggle */}
+                <div className={`flex items-center justify-between p-3 rounded-lg border ${
+                  isAccessibilityMode 
+                    ? 'bg-gray-700 border-white/40' 
+                    : 'glass-card border-white/20'
+                }`}>
+                  <div className="flex-1">
+                    <label htmlFor="realWordsOnly" className="block text-sm font-medium text-white/90 cursor-pointer">
+                      Real Words Only
+                    </label>
+                    <p className="text-xs text-white/60 mt-1">
+                      Players can only use real dictionary words
+                    </p>
+                  </div>
+                  
+                  <label htmlFor="realWordsOnly" className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="realWordsOnly"
+                      checked={realWordsOnly}
+                      onChange={(e) => setRealWordsOnly(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className={`relative rounded-full peer peer-focus:outline-none ${
+                      isAccessibilityMode 
+                        ? `w-11 h-6 border-2 ${realWordsOnly ? 'bg-blue-600 border-blue-400' : 'bg-gray-600 border-gray-400'} peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:shadow-sm`
+                        : 'w-11 h-6 bg-gray-200/20 peer-focus:ring-4 peer-focus:ring-blue-400/20 dark:bg-gray-700/50 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all duration-300 ease-in-out peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-blue-600 shadow-lg'
+                    }`}>
+                    </div>
+                  </label>
+                </div>
               </div>
             )}
           </div>
@@ -409,6 +456,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   {hardMode ? 'Hard Mode 🔥' : 'Normal Mode'}
                 </span>
               </div>
+              {realWordsOnly && (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-white/70">Dictionary:</span>
+                  <span className="font-bold text-blue-400">Real Words Only 📖</span>
+                </div>
+              )}
               {hint && (
                 <div className="flex items-start gap-3">
                   <span className="text-sm font-medium text-white/70">Hint:</span>
@@ -450,6 +503,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 setMaxGuesses(6);
                 setIsInfinite(false);
                 setHardMode(false);
+                setRealWordsOnly(false);
                 setHint('');
                 setIsLoadingRandomWord(false);
                 setShowAdvanced(false);

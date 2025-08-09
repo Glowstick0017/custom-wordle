@@ -31,7 +31,7 @@ function vigenereCipher(text: string, key: string, encrypt: boolean = true): str
   return result.join('');
 }
 
-export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMode?: boolean; hint?: string }): string {
+export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMode?: boolean; realWordsOnly?: boolean; hint?: string }): string {
   const encryptedWord = vigenereCipher(wordle.word, CIPHER_KEY, true);
   
   // Build suffix: guess count, then hard mode indicator, then hint
@@ -51,6 +51,11 @@ export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMo
     suffix += '_h';
   }
   
+  // Add real words only indicator if enabled
+  if (wordle.realWordsOnly) {
+    suffix += '_r';
+  }
+  
   // Add hint if provided (base64 encoded to handle special characters)
   if (wordle.hint) {
     const encodedHint = btoa(wordle.hint).replace(/[+/=]/g, (char) => {
@@ -67,11 +72,12 @@ export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMo
   return `${encryptedWord}${suffix}`;
 }
 
-export function decryptWordle(encryptedData: string): { word: string; maxGuesses: number; hardMode: boolean; hint?: string } | null {
+export function decryptWordle(encryptedData: string): { word: string; maxGuesses: number; hardMode: boolean; realWordsOnly?: boolean; hint?: string } | null {
   try {
     let encryptedWord: string;
     let maxGuesses: number = 6; // default
     let hardMode: boolean = false; // default
+    let realWordsOnly: boolean = false; // default
     let hint: string | undefined = undefined; // default
     
     // Parse suffixes if they exist
@@ -87,6 +93,8 @@ export function decryptWordle(encryptedData: string): { word: string; maxGuesses
           maxGuesses = Infinity;
         } else if (part === 'h') {
           hardMode = true;
+        } else if (part === 'r') {
+          realWordsOnly = true;
         } else if (part.startsWith('hint')) {
           // Decode hint
           try {
@@ -119,10 +127,11 @@ export function decryptWordle(encryptedData: string): { word: string; maxGuesses
     
     const word = vigenereCipher(encryptedWord, CIPHER_KEY, false);
     
-    const result: { word: string; maxGuesses: number; hardMode: boolean; hint?: string } = {
+    const result: { word: string; maxGuesses: number; hardMode: boolean; realWordsOnly?: boolean; hint?: string } = {
       word: word.toUpperCase(),
       maxGuesses,
-      hardMode
+      hardMode,
+      realWordsOnly
     };
     
     if (hint) {

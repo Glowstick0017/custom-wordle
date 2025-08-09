@@ -8,9 +8,10 @@ export interface AlertProps {
   isOpen: boolean;
   onClose: () => void;
   duration?: number; // Auto close after duration (ms), default 4000ms
+  inModal?: boolean; // Whether the alert is displayed within a modal
 }
 
-export default function Alert({ message, type, isOpen, onClose, duration = 4000 }: AlertProps) {
+export default function Alert({ message, type, isOpen, onClose, duration = 4000, inModal = false }: AlertProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -36,15 +37,16 @@ export default function Alert({ message, type, isOpen, onClose, duration = 4000 
   if (!isOpen) return null;
 
   const getAlertStyles = () => {
+    const baseStyles = inModal ? 'backdrop-blur-xl bg-gray-900/95' : 'glass-card';
     switch (type) {
       case 'success':
-        return 'border-emerald-400/60 glass-card text-emerald-200';
+        return `border-emerald-400/80 ${baseStyles} text-emerald-100 ${inModal ? 'bg-emerald-900/90' : ''}`;
       case 'error':
-        return 'border-red-400/60 glass-card text-red-200';
+        return `border-red-400/80 ${baseStyles} text-red-100 ${inModal ? 'bg-red-900/90' : ''}`;
       case 'info':
-        return 'border-blue-400/60 glass-card text-blue-200';
+        return `border-blue-400/80 ${baseStyles} text-blue-100 ${inModal ? 'bg-blue-900/90' : ''}`;
       default:
-        return 'border-white/30 glass-card text-white/90';
+        return `border-white/50 ${baseStyles} text-white/95`;
     }
   };
 
@@ -74,13 +76,14 @@ export default function Alert({ message, type, isOpen, onClose, duration = 4000 
   };
 
   return (
-    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
+    <div className={`${inModal ? 'fixed top-16 left-1/2 transform -translate-x-1/2 z-[60]' : 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50'} w-full max-w-md px-4`}>
       <div
         className={`
           ${getAlertStyles()}
-          border-2 rounded-xl p-4 shadow-2xl
+          ${inModal ? 'border-3' : 'border-2'} rounded-xl p-4 shadow-2xl
           transform transition-all duration-300 ease-in-out
           ${isVisible ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-4 opacity-0 scale-95'}
+          ${inModal ? 'ring-2 ring-white/20 shadow-[0_0_50px_rgba(0,0,0,0.8)] border-opacity-100' : ''}
         `}
       >
         <div className="flex items-center gap-3">
@@ -108,7 +111,7 @@ export default function Alert({ message, type, isOpen, onClose, duration = 4000 
 }
 
 // Hook for managing alerts
-export function useAlert() {
+export function useAlert(inModal: boolean = false) {
   const [alert, setAlert] = useState<{
     message: string;
     type: 'success' | 'error' | 'info';
@@ -133,6 +136,7 @@ export function useAlert() {
       type={alert.type}
       isOpen={alert.isOpen}
       onClose={closeAlert}
+      inModal={inModal}
     />
   );
 

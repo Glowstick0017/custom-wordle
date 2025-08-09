@@ -38,6 +38,32 @@ export function isValidWord(word: string, length: number): boolean {
 }
 
 /**
+ * Validates if a word is a real word using the dictionary API
+ */
+export async function validateRealWord(word: string): Promise<{ isValid: boolean; error?: string }> {
+  if (!word || word.trim().length === 0) {
+    return { isValid: false, error: 'Word is required' };
+  }
+
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+    
+    if (response.status === 404) {
+      return { isValid: false, error: 'Not a real word' };
+    }
+    
+    if (!response.ok) {
+      return { isValid: false, error: 'Could not verify word' };
+    }
+    
+    return { isValid: true };
+  } catch (error) {
+    console.error('Dictionary API error:', error);
+    return { isValid: false, error: 'Could not verify word (network error)' };
+  }
+}
+
+/**
  * Validates if a guess follows hard mode rules
  * Hard mode requires all revealed hints (green and yellow letters) to be used in subsequent guesses
  */
@@ -96,7 +122,8 @@ export function generateShareText(
   word: string,
   gameStatus: 'won' | 'lost',
   maxGuesses: number,
-  hardMode: boolean = false
+  hardMode: boolean = false,
+  realWordsOnly: boolean = false
 ): string {
   const hardModeIndicator = hardMode ? ' *' : '';
   const result = gameStatus === 'won' 
@@ -126,7 +153,8 @@ export function generateShareText(
   const encryptedGame = encryptWordle({
     word: word.toUpperCase(),
     maxGuesses: maxGuesses,
-    hardMode: hardMode
+    hardMode: hardMode,
+    realWordsOnly: realWordsOnly
   });
   
   // Get the current domain or use a placeholder for the full URL

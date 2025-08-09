@@ -14,7 +14,7 @@ import AccessibilityToggle from '@/components/AccessibilityToggle';
 import { useAlert } from '@/components/Alert';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { decryptWordle } from '@/utils/encryption';
-import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats, validateHardModeGuess } from '@/utils/gameLogic';
+import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats, validateHardModeGuess, validateRealWord } from '@/utils/gameLogic';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
 
 function PlayGameContent() {
@@ -54,6 +54,7 @@ function PlayGameContent() {
           maxGuesses: decrypted.maxGuesses,
           wordLength: decrypted.word.length,
           hardMode: decrypted.hardMode,
+          realWordsOnly: decrypted.realWordsOnly,
           hint: decrypted.hint
         }));
         setGameLoaded(true);
@@ -87,7 +88,7 @@ function PlayGameContent() {
     }));
   }, [gameState.gameStatus]);
 
-  const handleEnter = useCallback(() => {
+  const handleEnter = useCallback(async () => {
     if (gameState.gameStatus !== 'playing') return;
     if (gameState.currentGuess.length !== gameState.wordLength) {
       showAlert(`Word must be ${gameState.wordLength} letters long`, 'error');
@@ -100,6 +101,15 @@ function PlayGameContent() {
     }
 
     const guess = gameState.currentGuess.toUpperCase();
+    
+    // Check real word validation if enabled
+    if (gameState.realWordsOnly) {
+      const realWordValidation = await validateRealWord(guess);
+      if (!realWordValidation.isValid) {
+        showAlert(`${realWordValidation.error}. Please use a real dictionary word.`, 'error');
+        return;
+      }
+    }
     
     // Check hard mode validation
     if (gameState.hardMode) {
@@ -147,7 +157,7 @@ function PlayGameContent() {
     // Handle game end
     if (won || lost) {
       const stats = updateStats(won, newGuesses.length);
-      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode);
+      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode, gameState.realWordsOnly);
       setShareText(shareTextContent);
       setTimeout(() => setShowGameOver(true), 1000);
     }
@@ -311,6 +321,9 @@ function PlayGameContent() {
                 <div>{gameState.wordLength} letters • {gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses</div>
                 {gameState.hardMode && (
                   <div className="text-orange-300 font-medium">Revealed hints must be used</div>
+                )}
+                {gameState.realWordsOnly && (
+                  <div className="text-blue-300 font-medium">Real words only</div>
                 )}
                 {gameState.hint && (
                   <div className="text-cyan-300 font-medium italic break-words">💡 {gameState.hint}</div>

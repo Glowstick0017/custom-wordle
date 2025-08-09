@@ -6,6 +6,7 @@ export interface GameState {
   maxGuesses: number;
   wordLength: number;
   hardMode: boolean;
+  realWordsOnly?: boolean;
   hint?: string;
 }
 
@@ -13,6 +14,8 @@ export interface CustomWordle {
   word: string;
   maxGuesses: number;
   hardMode: boolean;
+  realWordsOnly?: boolean;
+  hint?: string;
   createdAt: string;
 }
 

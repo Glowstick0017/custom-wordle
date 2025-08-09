@@ -17,7 +17,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-40 flex items-center justify-center" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div 
         className={`absolute inset-0 bg-black bg-opacity-80 ${
@@ -54,8 +54,10 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         </div>
         
         {/* Content */}
-        <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-140px)] text-white">
-          {children}
+        <div className="relative">
+          <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-140px)] text-white">
+            {children}
+          </div>
         </div>
       </div>
     </div>
