@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 
 export interface AlertProps {
   message: string;
@@ -122,23 +122,25 @@ export function useAlert(inModal: boolean = false) {
     isOpen: false
   });
 
-  const showAlert = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showAlert = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setAlert({ message, type, isOpen: true });
-  };
+  }, []);
 
-  const closeAlert = () => {
+  const closeAlert = useCallback(() => {
     setAlert(prev => ({ ...prev, isOpen: false }));
-  };
+  }, []);
 
-  const AlertComponent = () => (
-    <Alert
-      message={alert.message}
-      type={alert.type}
-      isOpen={alert.isOpen}
-      onClose={closeAlert}
-      inModal={inModal}
-    />
-  );
+  const AlertComponent = useMemo(() => {
+    return () => (
+      <Alert
+        message={alert.message}
+        type={alert.type}
+        isOpen={alert.isOpen}
+        onClose={closeAlert}
+        inModal={inModal}
+      />
+    );
+  }, [alert.message, alert.type, alert.isOpen, closeAlert, inModal]);
 
   return {
     showAlert,
