@@ -131,7 +131,7 @@ export function useAlert(inModal: boolean = false) {
   }, []);
 
   const AlertComponent = useMemo(() => {
-    return () => (
+    const Component = () => (
       <Alert
         message={alert.message}
         type={alert.type}
@@ -140,6 +140,8 @@ export function useAlert(inModal: boolean = false) {
         inModal={inModal}
       />
     );
+    Component.displayName = 'AlertComponent';
+    return Component;
   }, [alert.message, alert.type, alert.isOpen, closeAlert, inModal]);
 
   return {

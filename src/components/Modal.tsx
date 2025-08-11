@@ -27,11 +27,15 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       />
       
       {/* Modal */}
-      <div className={`relative rounded-xl w-full max-w-lg mx-2 sm:mx-4 max-h-[90vh] overflow-hidden ${
-        isAccessibilityMode 
-          ? 'bg-gray-800 border-2 border-white/40' 
-          : 'glass-card shadow-2xl border border-white/20'
-      }`} data-preserve-transitions>
+      <div 
+        className={`relative rounded-xl w-full max-w-lg mx-2 sm:mx-4 max-h-[90vh] overflow-hidden ${
+          isAccessibilityMode 
+            ? 'bg-gray-800 border-2 border-white/40' 
+            : 'glass-card shadow-2xl border border-white/20'
+        }`} 
+        data-preserve-transitions
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className={`flex items-center justify-between p-4 sm:p-6 border-b ${
           isAccessibilityMode 

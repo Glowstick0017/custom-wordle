@@ -135,6 +135,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 className="flex-1 px-4 py-4 glass-card border border-white/20 rounded-xl focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 text-lg font-mono uppercase text-white placeholder-white/50 transition-all duration-300"
                 placeholder="HELLO"
                 maxLength={30}
+                autoFocus
               />
               <button
                 type="button"

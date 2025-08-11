@@ -410,7 +410,7 @@ function PlayGameContent() {
               <button
                 onClick={() => {
                   setShowGameOver(false);
-                  setShowCreate(true);
+                  setTimeout(() => setShowCreate(true), 100);
                 }}
                 className="flex-1 btn-gradient-accent text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2"
               >
