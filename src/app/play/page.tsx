@@ -20,7 +20,7 @@ import { GameState, LetterState, KeyboardKey } from '@/types/game';
 function PlayGameContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { showAlert, AlertComponent } = useAlert();
+  const { showAlert, AlertComponent } = useAlert(true);
   const { isAccessibilityMode } = useAccessibility();
   const [gameState, setGameState] = useState<GameState>({
     word: '',
@@ -166,6 +166,9 @@ function PlayGameContent() {
   // Physical keyboard support
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Don't handle keyboard events when any modal is open
+      if (showGameOver || showStats || showCreate || showHowToPlay) return;
+      
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       
       if (event.key === 'Enter') {
@@ -182,7 +185,7 @@ function PlayGameContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyPress, handleBackspace, handleEnter]);
+  }, [handleKeyPress, handleBackspace, handleEnter, showGameOver, showStats, showCreate, showHowToPlay]);
 
   const handleShare = async () => {
     try {
@@ -405,7 +408,10 @@ function PlayGameContent() {
               </button>
               
               <button
-                onClick={() => setShowCreate(true)}
+                onClick={() => {
+                  setShowGameOver(false);
+                  setShowCreate(true);
+                }}
                 className="flex-1 btn-gradient-accent text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center gap-2"
               >
                 <Plus size={16} />
