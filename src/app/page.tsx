@@ -1,18 +1,46 @@
 'use client';
 
-import { Plus, BarChart3 } from 'lucide-react';
-import { useState } from 'react';
+import { Plus, BarChart3, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import StatsModal from '@/components/StatsModal';
 import CreateModal from '@/components/CreateModal';
 import AccessibilityToggle from '@/components/AccessibilityToggle';
 import { getStoredStats } from '@/utils/gameLogic';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
+import { getDailyWord, getDailyGameDate, preloadWordList } from '@/utils/dailyGame';
+import { encryptWordle } from '@/utils/encryption';
 
 export default function Home() {
   const [showStats, setShowStats] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [isLoadingDaily, setIsLoadingDaily] = useState(false);
   const { isAccessibilityMode } = useAccessibility();
+  const router = useRouter();
   const stats = getStoredStats();
+
+  // Preload the word list when the component mounts for better performance
+  useEffect(() => {
+    preloadWordList();
+  }, []);
+
+  const handlePlayDaily = async () => {
+    setIsLoadingDaily(true);
+    try {
+      const dailyWord = await getDailyWord();
+      const encryptedGame = encryptWordle({
+        word: dailyWord,
+        maxGuesses: 6,
+        hardMode: false,
+        realWordsOnly: true
+      });
+      router.push(`/play?w=${encryptedGame}`);
+    } catch (error) {
+      console.error('Failed to load daily word:', error);
+      setIsLoadingDaily(false);
+      // Could show an alert here, but for now we'll just log the error
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -50,6 +78,29 @@ export default function Home() {
         {/* Action Buttons */}
         <div className="space-y-4">
           <button
+            onClick={handlePlayDaily}
+            disabled={isLoadingDaily}
+            className="w-full btn-gradient-accent text-white font-bold py-5 px-6 rounded-xl flex items-center justify-center gap-3 text-lg relative group disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoadingDaily ? (
+              <>
+                <div className="animate-spin rounded-full h-6 w-6 border-2 border-transparent border-t-white"></div>
+                <span>Loading...</span>
+              </>
+            ) : (
+              <>
+                <Calendar size={24} />
+                <div className="flex flex-col items-start">
+                  <span>Play Daily Game</span>
+                  <span className="text-xs text-white/70 group-hover:text-white/90 transition-colors">
+                    {getDailyGameDate()}
+                  </span>
+                </div>
+              </>
+            )}
+          </button>
+
+          <button
             onClick={() => setShowCreate(true)}
             className="w-full btn-gradient-primary text-white font-bold py-5 px-6 rounded-xl flex items-center justify-center gap-3 text-lg"
           >
@@ -70,6 +121,10 @@ export default function Home() {
         <div className="glass-card glass-card-hover rounded-xl p-6">
           <h2 className={`font-bold text-xl mb-4 ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>How to Play</h2>
           <ul className="space-y-3 text-sm text-white/90">
+            <li className="flex items-start gap-3">
+              <span className="text-cyan-400 font-bold">•</span>
+              <span>Play a new daily word challenge every day</span>
+            </li>
             <li className="flex items-start gap-3">
               <span className="text-emerald-400 font-bold">•</span>
               <span>Create custom Wordles with any word length (1-30 letters)</span>
