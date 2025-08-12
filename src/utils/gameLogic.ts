@@ -64,6 +64,45 @@ export async function validateRealWord(word: string): Promise<{ isValid: boolean
 }
 
 /**
+ * Fetches the definition of a word from the dictionary API
+ */
+export async function fetchWordDefinition(word: string): Promise<{ word: string; definition: string } | null> {
+  if (!word || word.trim().length === 0) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+    
+    if (response.status === 404) {
+      return null; // Word not found
+    }
+    
+    if (!response.ok) {
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    // Extract the first definition from the response
+    if (data && data.length > 0 && data[0].meanings && data[0].meanings.length > 0) {
+      const firstMeaning = data[0].meanings[0];
+      if (firstMeaning.definitions && firstMeaning.definitions.length > 0) {
+        return {
+          word: data[0].word,
+          definition: firstMeaning.definitions[0].definition
+        };
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Dictionary API error:', error);
+    return null;
+  }
+}
+
+/**
  * Validates if a guess follows hard mode rules
  * Hard mode requires all revealed hints (green and yellow letters) to be used in subsequent guesses
  */

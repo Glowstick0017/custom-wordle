@@ -14,7 +14,7 @@ import AccessibilityToggle from '@/components/AccessibilityToggle';
 import { useAlert } from '@/components/Alert';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { decryptWordle } from '@/utils/encryption';
-import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats, validateHardModeGuess, validateRealWord } from '@/utils/gameLogic';
+import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats, validateHardModeGuess, validateRealWord, fetchWordDefinition } from '@/utils/gameLogic';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
 
 function PlayGameContent() {
@@ -41,6 +41,8 @@ function PlayGameContent() {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [shareText, setShareText] = useState('');
   const [gameLoaded, setGameLoaded] = useState(false);
+  const [wordDefinition, setWordDefinition] = useState<{ word: string; definition: string } | null>(null);
+  const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
 
   // Initialize game from URL parameter
   useEffect(() => {
@@ -159,6 +161,19 @@ function PlayGameContent() {
       const stats = updateStats(won, newGuesses.length);
       const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode, gameState.realWordsOnly);
       setShareText(shareTextContent);
+      
+      // Fetch word definition
+      setIsLoadingDefinition(true);
+      fetchWordDefinition(gameState.word)
+        .then(definition => {
+          setWordDefinition(definition);
+          setIsLoadingDefinition(false);
+        })
+        .catch(() => {
+          setWordDefinition(null);
+          setIsLoadingDefinition(false);
+        });
+      
       setTimeout(() => setShowGameOver(true), 1000);
     }
   }, [gameState, keyStates]);
@@ -209,6 +224,8 @@ function PlayGameContent() {
     setKeyStates({});
     setShowGameOver(false);
     setShareText('');
+    setWordDefinition(null);
+    setIsLoadingDefinition(false);
   };
 
   if (!gameLoaded) {
@@ -388,6 +405,26 @@ function PlayGameContent() {
               </div>
             )}
           </div>
+
+          {/* Word Definition Section */}
+          {isLoadingDefinition ? (
+            <div className="glass-card p-4 rounded-xl border border-white/10">
+              <div className="flex items-center justify-center gap-2 text-white/70">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-transparent border-t-white/70"></div>
+                <span>Loading definition...</span>
+              </div>
+            </div>
+          ) : wordDefinition ? (
+            <div className="glass-card p-4 rounded-xl border border-white/10 text-left">
+              <div className="mb-2">
+                <span className="text-white/70 text-sm">Definition of </span>
+                <span className={`font-bold ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>
+                  {wordDefinition.word}
+                </span>
+              </div>
+              <p className="text-white/90 leading-relaxed">{wordDefinition.definition}</p>
+            </div>
+          ) : null}
 
           <div className="space-y-4">
             <button
