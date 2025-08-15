@@ -44,21 +44,49 @@ function PlayGameContent() {
   const [wordDefinition, setWordDefinition] = useState<{ word: string; definition: string } | null>(null);
   const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
 
+  const resetAllGameState = useCallback(() => {
+    setGameState({
+      word: '',
+      guesses: [],
+      currentGuess: '',
+      gameStatus: 'playing',
+      maxGuesses: 6,
+      wordLength: 5,
+      hardMode: false,
+      hint: undefined
+    });
+    setLetterStates({});
+    setKeyStates({});
+    setShowGameOver(false);
+    setShowStats(false);
+    setShowCreate(false);
+    setShowHowToPlay(false);
+    setShareText('');
+    setWordDefinition(null);
+    setIsLoadingDefinition(false);
+  }, []);
+
   // Initialize game from URL parameter
   useEffect(() => {
     const encryptedData = searchParams.get('w');
     if (encryptedData) {
       const decrypted = decryptWordle(encryptedData);
       if (decrypted) {
-        setGameState(prev => ({
-          ...prev,
+        // Reset all game state first to ensure clean slate
+        resetAllGameState();
+        
+        // Then set the new game data
+        setGameState({
           word: decrypted.word,
+          guesses: [],
+          currentGuess: '',
+          gameStatus: 'playing',
           maxGuesses: decrypted.maxGuesses,
           wordLength: decrypted.word.length,
           hardMode: decrypted.hardMode,
           realWordsOnly: decrypted.realWordsOnly,
           hint: decrypted.hint
-        }));
+        });
         setGameLoaded(true);
       } else {
         showAlert('Invalid or corrupted game link', 'error');
@@ -67,7 +95,7 @@ function PlayGameContent() {
     } else {
       setGameLoaded(true);
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, resetAllGameState]);
 
   // Handle keyboard input
   const handleKeyPress = useCallback((key: string) => {
