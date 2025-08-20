@@ -206,6 +206,45 @@ export function generateShareText(
   return `Glowdle ${result}\n\n${grid}\n${gameUrl}`;
 }
 
+export function generateDailyShareText(
+  guesses: string[],
+  word: string,
+  gameStatus: 'won' | 'lost',
+  maxGuesses: number
+): string {
+  const result = gameStatus === 'won' 
+    ? `${guesses.length}/${maxGuesses === Infinity ? '∞' : maxGuesses}`
+    : `X/${maxGuesses === Infinity ? '∞' : maxGuesses}`;
+  
+  let grid = '';
+  guesses.forEach(guess => {
+    const letterStates = checkGuess(guess, word);
+    letterStates.forEach(({ status }) => {
+      switch (status) {
+        case 'correct':
+          grid += '🟩';
+          break;
+        case 'present':
+          grid += '🟨';
+          break;
+        case 'absent':
+          grid += '⬜';
+          break;
+      }
+    });
+    grid += '\n';
+  });
+
+  // Get the current domain for the daily game URL
+  const baseUrl = typeof window !== 'undefined' 
+    ? `${window.location.protocol}//${window.location.host}`
+    : 'https://your-domain.com';
+  
+  const gameUrl = `${baseUrl}/daily`;
+
+  return `Daily Glowdle ${result}\n\n${grid}\n${gameUrl}`;
+}
+
 export function getStoredStats(): GameStats {
   if (typeof window === 'undefined') {
     return {
