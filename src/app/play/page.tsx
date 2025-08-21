@@ -187,7 +187,7 @@ function PlayGameContent() {
     // Handle game end
     if (won || lost) {
       const stats = updateStats(won, newGuesses.length);
-      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode, gameState.realWordsOnly);
+      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode, gameState.realWordsOnly, gameState.hint);
       setShareText(shareTextContent);
       
       // Fetch word definition

@@ -162,7 +162,8 @@ export function generateShareText(
   gameStatus: 'won' | 'lost',
   maxGuesses: number,
   hardMode: boolean = false,
-  realWordsOnly: boolean = false
+  realWordsOnly: boolean = false,
+  hint?: string
 ): string {
   const hardModeIndicator = hardMode ? ' *' : '';
   const result = gameStatus === 'won' 
@@ -193,7 +194,8 @@ export function generateShareText(
     word: word.toUpperCase(),
     maxGuesses: maxGuesses,
     hardMode: hardMode,
-    realWordsOnly: realWordsOnly
+    realWordsOnly: realWordsOnly,
+    hint: hint
   });
   
   // Get the current domain or use a placeholder for the full URL
@@ -203,7 +205,10 @@ export function generateShareText(
   
   const gameUrl = `${baseUrl}/play?w=${encryptedGame}`;
 
-  return `Glowdle ${result}\n\n${grid}\n${gameUrl}`;
+  // Add hint to share text if it exists
+  const hintText = hint ? `\n💡 Hint: ${hint}\n` : '\n';
+
+  return `Glowdle ${result}\n\n${grid}${hintText}${gameUrl}`;
 }
 
 export function generateDailyShareText(
