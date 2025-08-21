@@ -204,11 +204,8 @@ export function generateShareText(
     : 'https://your-domain.com';
   
   const gameUrl = `${baseUrl}/play?w=${encryptedGame}`;
-
-  // Add hint to share text if it exists
-  const hintText = hint ? `\n💡 Hint: ${hint}\n` : '\n';
-
-  return `Glowdle ${result}\n\n${grid}${hintText}${gameUrl}`;
+  
+  return `Glowdle ${result}\n\n${grid}\n${gameUrl}`;
 }
 
 export function generateDailyShareText(
