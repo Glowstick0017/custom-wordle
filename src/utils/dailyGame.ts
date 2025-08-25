@@ -5,6 +5,55 @@ const WORDLE_ANSWERS_URL = 'https://gist.githubusercontent.com/cfreshman/a03ef2c
 let cachedWordList: string[] | null = null;
 let fetchPromise: Promise<string[]> | null = null;
 
+/**
+ * Shuffles an array using the Fisher-Yates algorithm with a seeded random number generator
+ * This ensures the same seed always produces the same shuffle order
+ */
+function seededShuffle<T>(array: T[], seed: number): T[] {
+  const shuffled = [...array];
+  let currentIndex = shuffled.length;
+  
+  // Simple seeded random number generator (Linear Congruential Generator)
+  let randomSeed = seed;
+  const seededRandom = () => {
+    randomSeed = (randomSeed * 1664525 + 1013904223) % 4294967296;
+    return randomSeed / 4294967296;
+  };
+
+  while (currentIndex !== 0) {
+    const randomIndex = Math.floor(seededRandom() * currentIndex);
+    currentIndex--;
+    [shuffled[currentIndex], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[currentIndex]];
+  }
+
+  return shuffled;
+}
+
+/**
+ * Creates a better hash from a string using multiple hash functions
+ * This implementation ensures good distribution even for similar strings
+ */
+function createStrongHash(str: string): number {
+  let hash = 0;
+  
+  // Use a more sensitive hash function that amplifies small differences
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    // Use position-dependent multiplier to make character position matter more
+    const positionMultiplier = (i + 1) * 31;
+    hash = ((hash * 33) ^ (char * positionMultiplier)) >>> 0;
+  }
+  
+  // Apply additional mixing to ensure good distribution
+  hash ^= hash >>> 16;
+  hash *= 0x85ebca6b;
+  hash ^= hash >>> 13;
+  hash *= 0xc2b2ae35;
+  hash ^= hash >>> 16;
+  
+  return Math.abs(hash);
+}
+
 // Fallback words in case the fetch fails (from the original Wordle answers)
 const FALLBACK_WORDS = [
   'ABOUT', 'ABOVE', 'ABUSE', 'ACTOR', 'ACUTE', 'ADMIT', 'ADOPT', 'ADULT', 'AFTER', 'AGAIN',
@@ -61,13 +110,17 @@ async function fetchWordList(): Promise<string[]> {
         throw new Error('No valid words found in the response');
       }
       
-      cachedWordList = words;
-      console.log(`Loaded ${words.length} words from official Wordle list`);
-      return words;
+      // Shuffle the words with a fixed seed to ensure consistent but non-alphabetical order
+      const shuffledWords = seededShuffle(words, 789456); // Fixed seed for consistency
+      cachedWordList = shuffledWords;
+      console.log(`Loaded and shuffled ${shuffledWords.length} words from official Wordle list`);
+      return shuffledWords;
     } catch (error) {
       console.error('Failed to fetch Wordle words, using fallback list:', error);
-      cachedWordList = FALLBACK_WORDS;
-      return FALLBACK_WORDS;
+      // Also shuffle the fallback words
+      const shuffledFallback = seededShuffle(FALLBACK_WORDS, 789456);
+      cachedWordList = shuffledFallback;
+      return shuffledFallback;
     } finally {
       fetchPromise = null;
     }
@@ -78,7 +131,7 @@ async function fetchWordList(): Promise<string[]> {
 
 /**
  * Generates a deterministic daily word based on the current date
- * Uses a simple seeded random number generator to ensure consistency
+ * Uses a strong hash function and pre-shuffled word list to ensure unpredictable but consistent selection
  */
 export async function getDailyWord(): Promise<string> {
   const wordList = await fetchWordList();
@@ -89,16 +142,11 @@ export async function getDailyWord(): Promise<string> {
     String(today.getMonth() + 1).padStart(2, '0') + '-' + 
     String(today.getDate()).padStart(2, '0');
   
-  // Create a simple hash from the date string
-  let hash = 0;
-  for (let i = 0; i < dateString.length; i++) {
-    const char = dateString.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
+  // Create a strong hash from the date string
+  const hash = createStrongHash(dateString);
   
-  // Use the hash to select a word from our list
-  const index = Math.abs(hash) % wordList.length;
+  // Use the hash to select a word from our shuffled list
+  const index = hash % wordList.length;
   return wordList[index];
 }
 
