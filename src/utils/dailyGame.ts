@@ -6,7 +6,7 @@ let cachedWordList: string[] | null = null;
 let fetchPromise: Promise<string[]> | null = null;
 
 // Cache for validated words to avoid repeated dictionary API calls
-let validatedWordsCache: Map<string, boolean> = new Map();
+const validatedWordsCache: Map<string, boolean> = new Map();
 
 /**
  * Shuffles an array using the Fisher-Yates algorithm with a seeded random number generator
