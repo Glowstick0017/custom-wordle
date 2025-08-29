@@ -48,7 +48,7 @@ function DailyGameContent() {
   useEffect(() => {
     const loadDailyGame = async () => {
       try {
-        const dailyWord = await getDailyWord();
+        const dailyWord = await getDailyWord(showAlert);
         setGameState(prev => ({
           ...prev,
           word: dailyWord,
@@ -102,7 +102,7 @@ function DailyGameContent() {
     
     // Check real word validation (always enabled for daily games)
     if (gameState.realWordsOnly) {
-      const realWordValidation = await validateRealWord(guess);
+      const realWordValidation = await validateRealWord(guess, showAlert);
       if (!realWordValidation.isValid) {
         showAlert(`${realWordValidation.error}. Please use a real dictionary word.`, 'error');
         return;
@@ -160,7 +160,7 @@ function DailyGameContent() {
       
       // Fetch word definition
       setIsLoadingDefinition(true);
-      fetchWordDefinition(gameState.word)
+      fetchWordDefinition(gameState.word, showAlert)
         .then(definition => {
           setWordDefinition(definition);
           setIsLoadingDefinition(false);

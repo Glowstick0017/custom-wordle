@@ -5,6 +5,9 @@ const WORDLE_ANSWERS_URL = 'https://gist.githubusercontent.com/cfreshman/a03ef2c
 let cachedWordList: string[] | null = null;
 let fetchPromise: Promise<string[]> | null = null;
 
+// Cache for validated words to avoid repeated dictionary API calls
+let validatedWordsCache: Map<string, boolean> = new Map();
+
 /**
  * Shuffles an array using the Fisher-Yates algorithm with a seeded random number generator
  * This ensures the same seed always produces the same shuffle order
@@ -80,7 +83,7 @@ const FALLBACK_WORDS = [
 /**
  * Fetches the official Wordle answers list from GitHub
  */
-async function fetchWordList(): Promise<string[]> {
+async function fetchWordList(showAlert?: (message: string, type: 'success' | 'error' | 'info') => void): Promise<string[]> {
   // Return cached result if available
   if (cachedWordList) {
     return cachedWordList;
@@ -96,7 +99,11 @@ async function fetchWordList(): Promise<string[]> {
     try {
       const response = await fetch(WORDLE_ANSWERS_URL);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorMsg = `Failed to fetch word list: HTTP ${response.status}`;
+        if (showAlert) {
+          showAlert(errorMsg, 'error');
+        }
+        throw new Error(errorMsg);
       }
       
       const text = await response.text();
@@ -107,7 +114,11 @@ async function fetchWordList(): Promise<string[]> {
         .filter(word => word.length === 5 && /^[A-Z]+$/.test(word));
       
       if (words.length === 0) {
-        throw new Error('No valid words found in the response');
+        const errorMsg = 'No valid words found in the word list';
+        if (showAlert) {
+          showAlert(errorMsg, 'error');
+        }
+        throw new Error(errorMsg);
       }
       
       // Shuffle the words with a fixed seed to ensure consistent but non-alphabetical order
@@ -117,6 +128,9 @@ async function fetchWordList(): Promise<string[]> {
       return shuffledWords;
     } catch (error) {
       console.error('Failed to fetch Wordle words, using fallback list:', error);
+      if (showAlert && error instanceof Error && !error.message.includes('HTTP')) {
+        showAlert('Network error loading word list. Using offline words.', 'error');
+      }
       // Also shuffle the fallback words
       const shuffledFallback = seededShuffle(FALLBACK_WORDS, 789456);
       cachedWordList = shuffledFallback;
@@ -132,9 +146,10 @@ async function fetchWordList(): Promise<string[]> {
 /**
  * Generates a deterministic daily word based on the current date
  * Uses a strong hash function and pre-shuffled word list to ensure unpredictable but consistent selection
+ * Validates the selected word against the dictionary API and falls back to other words if needed
  */
-export async function getDailyWord(): Promise<string> {
-  const wordList = await fetchWordList();
+export async function getDailyWord(showAlert?: (message: string, type: 'success' | 'error' | 'info') => void): Promise<string> {
+  const wordList = await fetchWordList(showAlert);
   
   // Get today's date in YYYY-MM-DD format
   const today = new Date();
@@ -145,9 +160,28 @@ export async function getDailyWord(): Promise<string> {
   // Create a strong hash from the date string
   const hash = createStrongHash(dateString);
   
-  // Use the hash to select a word from our shuffled list
-  const index = hash % wordList.length;
-  return wordList[index];
+  // Try up to 10 words to find a valid one
+  const maxAttempts = 10;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Use the hash + attempt to select a word from our shuffled list
+    const index = (hash + attempt) % wordList.length;
+    const candidate = wordList[index];
+    
+    // Validate the word against the dictionary API
+    const isValid = await validateDailyWord(candidate, showAlert);
+    if (isValid) {
+      console.log(`Daily word selected: "${candidate}" (attempt ${attempt + 1})`);
+      return candidate;
+    }
+    
+    console.log(`Word "${candidate}" failed dictionary validation, trying next word...`);
+  }
+  
+  // If we couldn't find a valid word after maxAttempts, fall back to the first word
+  // This should be extremely rare given that the word list comes from official Wordle answers
+  const fallbackWord = wordList[hash % wordList.length];
+  console.warn(`Could not validate any daily word after ${maxAttempts} attempts, using fallback: "${fallbackWord}"`);
+  return fallbackWord;
 }
 
 /**
@@ -172,15 +206,45 @@ export async function isValidDailyWord(word: string): Promise<boolean> {
 }
 
 /**
- * Validates a word against the dictionary API
+ * Validates a word against the dictionary API with caching
  * This is used to ensure our daily words are real dictionary words
  */
-export async function validateDailyWord(word: string): Promise<boolean> {
+export async function validateDailyWord(word: string, showAlert?: (message: string, type: 'success' | 'error' | 'info') => void): Promise<boolean> {
+  // Check cache first
+  const upperWord = word.toUpperCase();
+  if (validatedWordsCache.has(upperWord)) {
+    return validatedWordsCache.get(upperWord)!;
+  }
+
   try {
     const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
-    return response.status === 200;
+    
+    if (response.status === 404) {
+      // 404 is expected for invalid words, don't show alert
+      validatedWordsCache.set(upperWord, false);
+      return false;
+    }
+    
+    if (!response.ok) {
+      const errorMsg = `Dictionary API error: HTTP ${response.status}`;
+      console.error(errorMsg);
+      if (showAlert) {
+        showAlert('Unable to verify word. Please try again later.', 'error');
+      }
+      // Don't cache API errors, allow retry
+      return false;
+    }
+    
+    const isValid = response.status === 200;
+    // Cache the result
+    validatedWordsCache.set(upperWord, isValid);
+    return isValid;
   } catch (error) {
     console.error(`Error validating word "${word}":`, error);
+    if (showAlert) {
+      showAlert('Network error verifying word. Please check your connection.', 'error');
+    }
+    // Don't cache network errors, allow retry
     return false;
   }
 }
@@ -189,11 +253,11 @@ export async function validateDailyWord(word: string): Promise<boolean> {
  * Validates multiple words against the dictionary API
  * Useful for batch validation of the word list
  */
-export async function validateWordList(words: string[]): Promise<{ word: string; isValid: boolean }[]> {
+export async function validateWordList(words: string[], showAlert?: (message: string, type: 'success' | 'error' | 'info') => void): Promise<{ word: string; isValid: boolean }[]> {
   const results = await Promise.allSettled(
     words.map(async (word) => ({
       word,
-      isValid: await validateDailyWord(word)
+      isValid: await validateDailyWord(word, showAlert)
     }))
   );
 

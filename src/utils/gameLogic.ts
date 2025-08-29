@@ -40,7 +40,7 @@ export function isValidWord(word: string, length: number): boolean {
 /**
  * Validates if a word is a real word using the dictionary API
  */
-export async function validateRealWord(word: string): Promise<{ isValid: boolean; error?: string }> {
+export async function validateRealWord(word: string, showAlert?: (message: string, type: 'success' | 'error' | 'info') => void): Promise<{ isValid: boolean; error?: string }> {
   if (!word || word.trim().length === 0) {
     return { isValid: false, error: 'Word is required' };
   }
@@ -53,12 +53,20 @@ export async function validateRealWord(word: string): Promise<{ isValid: boolean
     }
     
     if (!response.ok) {
+      const errorMsg = `Dictionary API error: HTTP ${response.status}`;
+      console.error(errorMsg);
+      if (showAlert) {
+        showAlert('Unable to verify word. Please try again later.', 'error');
+      }
       return { isValid: false, error: 'Could not verify word' };
     }
     
     return { isValid: true };
   } catch (error) {
     console.error('Dictionary API error:', error);
+    if (showAlert) {
+      showAlert('Network error verifying word. Please check your connection.', 'error');
+    }
     return { isValid: false, error: 'Could not verify word (network error)' };
   }
 }
@@ -66,7 +74,7 @@ export async function validateRealWord(word: string): Promise<{ isValid: boolean
 /**
  * Fetches the definition of a word from the dictionary API
  */
-export async function fetchWordDefinition(word: string): Promise<{ word: string; definition: string } | null> {
+export async function fetchWordDefinition(word: string, showAlert?: (message: string, type: 'success' | 'error' | 'info') => void): Promise<{ word: string; definition: string } | null> {
   if (!word || word.trim().length === 0) {
     return null;
   }
@@ -79,6 +87,13 @@ export async function fetchWordDefinition(word: string): Promise<{ word: string;
     }
     
     if (!response.ok) {
+      if (response.status !== 404) {
+        const errorMsg = `Dictionary API error: HTTP ${response.status}`;
+        console.error(errorMsg);
+        if (showAlert) {
+          showAlert('Unable to fetch word definition. Please try again later.', 'error');
+        }
+      }
       return null;
     }
     
@@ -98,6 +113,9 @@ export async function fetchWordDefinition(word: string): Promise<{ word: string;
     return null;
   } catch (error) {
     console.error('Dictionary API error:', error);
+    if (showAlert) {
+      showAlert('Network error fetching definition. Please check your connection.', 'error');
+    }
     return null;
   }
 }

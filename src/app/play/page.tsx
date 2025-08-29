@@ -134,7 +134,7 @@ function PlayGameContent() {
     
     // Check real word validation if enabled
     if (gameState.realWordsOnly) {
-      const realWordValidation = await validateRealWord(guess);
+      const realWordValidation = await validateRealWord(guess, showAlert);
       if (!realWordValidation.isValid) {
         showAlert(`${realWordValidation.error}. Please use a real dictionary word.`, 'error');
         return;
@@ -192,7 +192,7 @@ function PlayGameContent() {
       
       // Fetch word definition
       setIsLoadingDefinition(true);
-      fetchWordDefinition(gameState.word)
+      fetchWordDefinition(gameState.word, showAlert)
         .then(definition => {
           setWordDefinition(definition);
           setIsLoadingDefinition(false);

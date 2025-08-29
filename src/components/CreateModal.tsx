@@ -42,7 +42,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
     // Validate real word if setting is enabled
     if (realWordsOnly) {
-      const validation = await validateRealWord(word);
+      const validation = await validateRealWord(word, showAlert);
       if (!validation.isValid) {
         showAlert(`${validation.error}. Please choose a real word or disable "Real Words Only".`, 'error');
         return;
