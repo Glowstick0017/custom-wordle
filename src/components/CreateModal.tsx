@@ -25,6 +25,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [realWordsOnly, setRealWordsOnly] = useState(false);
   const [hint, setHint] = useState('');
   const [isLoadingRandomWord, setIsLoadingRandomWord] = useState(false);
+  const [isValidatingWord, setIsValidatingWord] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
@@ -42,10 +43,15 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
     // Validate real word if setting is enabled
     if (realWordsOnly) {
-      const validation = await validateRealWord(word, showAlert);
-      if (!validation.isValid) {
-        showAlert(`${validation.error}. Please choose a real word or disable "Real Words Only".`, 'error');
-        return;
+      setIsValidatingWord(true);
+      try {
+        const validation = await validateRealWord(word, showAlert);
+        if (!validation.isValid) {
+          showAlert(`${validation.error}. Please choose a real word or disable "Real Words Only".`, 'error');
+          return;
+        }
+      } finally {
+        setIsValidatingWord(false);
       }
     }
 
@@ -80,6 +86,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setRealWordsOnly(false);
     setHint('');
     setIsLoadingRandomWord(false);
+    setIsValidatingWord(false);
     setShowAdvanced(false);
     setGeneratedLink('');
     setCopied(false);
@@ -119,6 +126,20 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Create Custom Glowdle">
+      {/* Loading overlay when validating word */}
+      {isValidatingWord && (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 rounded-xl">
+          <div className="text-center glass-card p-8 rounded-xl relative z-10">
+            <div className={`rounded-full h-12 w-12 border-4 border-transparent mx-auto mb-4 ${
+              isAccessibilityMode 
+                ? 'border-t-white animate-spin' 
+                : 'border-t-emerald-400 border-r-purple-400 border-b-orange-400 animate-spin'
+            }`}></div>
+            <p className="text-white/90 text-lg">Validating word...</p>
+          </div>
+        </div>
+      )}
+      
       {!generatedLink ? (
         /* Creation Form */
         <div className="space-y-6">
@@ -417,10 +438,17 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* Create Button */}
           <button
             onClick={handleCreateWordle}
-            disabled={!word || word.length < 1}
-            className="w-full btn-gradient-primary text-white font-bold py-4 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            disabled={!word || word.length < 1 || isValidatingWord}
+            className="w-full btn-gradient-primary text-white font-bold py-4 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
           >
-            Create Shareable Link
+            {isValidatingWord ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Validating Word...
+              </>
+            ) : (
+              'Create Shareable Link'
+            )}
           </button>
         </div>
       ) : (
@@ -507,6 +535,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 setRealWordsOnly(false);
                 setHint('');
                 setIsLoadingRandomWord(false);
+                setIsValidatingWord(false);
                 setShowAdvanced(false);
                 setGeneratedLink('');
                 setCopied(false);
