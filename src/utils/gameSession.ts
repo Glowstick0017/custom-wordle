@@ -108,6 +108,7 @@ export function clearGameSession(
   try {
     const key = getGameSessionKey(gameType, customGameId);
     localStorage.removeItem(key);
+    console.log(`Cleared ${gameType} game session:`, { key });
   } catch (error) {
     console.error('Failed to clear game session:', error);
   }

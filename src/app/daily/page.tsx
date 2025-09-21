@@ -61,6 +61,32 @@ function DailyGameContent() {
           setLetterStates(savedSession.letterStates);
           setKeyStates(savedSession.keyStates);
           setGameLoaded(true);
+          
+          // If the game was already complete, show the game over modal
+          if (savedSession.gameState.gameStatus === 'won' || savedSession.gameState.gameStatus === 'lost') {
+            const shareTextContent = generateDailyShareText(
+              savedSession.gameState.guesses, 
+              savedSession.gameState.word, 
+              savedSession.gameState.gameStatus, 
+              savedSession.gameState.maxGuesses
+            );
+            setShareText(shareTextContent);
+            
+            // Fetch word definition for completed games
+            setIsLoadingDefinition(true);
+            fetchWordDefinition(savedSession.gameState.word, showAlert)
+              .then(definition => {
+                setWordDefinition(definition);
+                setIsLoadingDefinition(false);
+              })
+              .catch(() => {
+                setWordDefinition(null);
+                setIsLoadingDefinition(false);
+              });
+            
+            // Show the game over modal after a brief delay
+            setTimeout(() => setShowGameOver(true), 500);
+          }
           return;
         }
 
@@ -234,6 +260,9 @@ function DailyGameContent() {
   };
 
   const resetGame = () => {
+    // Clear the saved session first, then reset game state
+    clearGameSession('daily');
+    
     setGameState(prev => ({
       ...prev,
       guesses: [],
@@ -246,9 +275,6 @@ function DailyGameContent() {
     setShareText('');
     setWordDefinition(null);
     setIsLoadingDefinition(false);
-    
-    // Clear the saved session so the reset game state is saved
-    clearGameSession('daily');
   };
 
   if (!gameLoaded) {
