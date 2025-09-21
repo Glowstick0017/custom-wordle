@@ -15,6 +15,7 @@ import { useAlert } from '@/components/Alert';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { getDailyWord, getDailyGameDate } from '@/utils/dailyGame';
 import { checkGuess, isValidWord, generateDailyShareText, updateStats, getStoredStats, validateHardModeGuess, validateRealWord, fetchWordDefinition } from '@/utils/gameLogic';
+import { saveGameSession, loadGameSession, clearOutdatedDailySessions, clearGameSession } from '@/utils/gameSession';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
 
 function DailyGameContent() {
@@ -48,6 +49,22 @@ function DailyGameContent() {
   useEffect(() => {
     const loadDailyGame = async () => {
       try {
+        // Clear any outdated daily sessions first
+        clearOutdatedDailySessions();
+
+        // Try to load saved session first
+        const savedSession = loadGameSession('daily');
+        
+        if (savedSession) {
+          // Restore saved game state
+          setGameState(savedSession.gameState);
+          setLetterStates(savedSession.letterStates);
+          setKeyStates(savedSession.keyStates);
+          setGameLoaded(true);
+          return;
+        }
+
+        // No saved session, start fresh daily game
         const dailyWord = await getDailyWord(showAlert);
         setGameState(prev => ({
           ...prev,
@@ -64,6 +81,13 @@ function DailyGameContent() {
 
     loadDailyGame();
   }, [router, showAlert]);
+
+  // Save game state whenever it changes (but only after game is loaded)
+  useEffect(() => {
+    if (gameLoaded && gameState.word) {
+      saveGameSession(gameState, letterStates, keyStates, 'daily');
+    }
+  }, [gameState, letterStates, keyStates, gameLoaded]);
 
   // Handle keyboard input
   const handleKeyPress = useCallback((key: string) => {
@@ -222,6 +246,9 @@ function DailyGameContent() {
     setShareText('');
     setWordDefinition(null);
     setIsLoadingDefinition(false);
+    
+    // Clear the saved session so the reset game state is saved
+    clearGameSession('daily');
   };
 
   if (!gameLoaded) {

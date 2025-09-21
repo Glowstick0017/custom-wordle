@@ -15,6 +15,7 @@ import { useAlert } from '@/components/Alert';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { decryptWordle } from '@/utils/encryption';
 import { checkGuess, isValidWord, generateShareText, updateStats, getStoredStats, validateHardModeGuess, validateRealWord, fetchWordDefinition } from '@/utils/gameLogic';
+import { saveGameSession, loadGameSession, clearGameSession } from '@/utils/gameSession';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
 
 function PlayGameContent() {
@@ -43,6 +44,7 @@ function PlayGameContent() {
   const [gameLoaded, setGameLoaded] = useState(false);
   const [wordDefinition, setWordDefinition] = useState<{ word: string; definition: string } | null>(null);
   const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
+  const [currentGameId, setCurrentGameId] = useState<string | null>(null);
 
   const resetAllGameState = useCallback(() => {
     setGameState({
@@ -64,18 +66,31 @@ function PlayGameContent() {
     setShareText('');
     setWordDefinition(null);
     setIsLoadingDefinition(false);
+    setCurrentGameId(null);
   }, []);
 
   // Initialize game from URL parameter
   useEffect(() => {
     const encryptedData = searchParams.get('w');
     if (encryptedData) {
+      setCurrentGameId(encryptedData);
+      
+      // Try to load saved session first
+      const savedSession = loadGameSession('custom', encryptedData);
+      
+      if (savedSession) {
+        // Restore saved game state
+        setGameState(savedSession.gameState);
+        setLetterStates(savedSession.letterStates);
+        setKeyStates(savedSession.keyStates);
+        setGameLoaded(true);
+        return;
+      }
+
+      // No saved session, decrypt and start fresh
       const decrypted = decryptWordle(encryptedData);
       if (decrypted) {
-        // Reset all game state first to ensure clean slate
-        resetAllGameState();
-        
-        // Then set the new game data
+        // Set the new game data directly (don't call resetAllGameState)
         setGameState({
           word: decrypted.word,
           guesses: [],
@@ -87,15 +102,29 @@ function PlayGameContent() {
           realWordsOnly: decrypted.realWordsOnly,
           hint: decrypted.hint
         });
+        setLetterStates({});
+        setKeyStates({});
+        setShowGameOver(false);
+        setShareText('');
+        setWordDefinition(null);
+        setIsLoadingDefinition(false);
         setGameLoaded(true);
       } else {
         showAlert('Invalid or corrupted game link', 'error');
         router.push('/');
       }
     } else {
+      setCurrentGameId(null);
       setGameLoaded(true);
     }
-  }, [searchParams, router, resetAllGameState]);
+  }, [searchParams, router, showAlert]);
+
+  // Save game state whenever it changes (but only after game is loaded and for valid games)
+  useEffect(() => {
+    if (gameLoaded && gameState.word && currentGameId) {
+      saveGameSession(gameState, letterStates, keyStates, 'custom', currentGameId);
+    }
+  }, [gameState, letterStates, keyStates, gameLoaded, currentGameId]);
 
   // Handle keyboard input
   const handleKeyPress = useCallback((key: string) => {
@@ -254,6 +283,11 @@ function PlayGameContent() {
     setShareText('');
     setWordDefinition(null);
     setIsLoadingDefinition(false);
+    
+    // Clear the saved session so the reset game state is saved
+    if (currentGameId) {
+      clearGameSession('custom', currentGameId);
+    }
   };
 
   if (!gameLoaded) {
