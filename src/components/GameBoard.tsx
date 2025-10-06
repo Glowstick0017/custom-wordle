@@ -1,7 +1,7 @@
 'use client';
 
 import { LetterState } from '@/types/game';
-import { useEffect, useRef } from 'react';
+import { memo, useRef } from 'react';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 
 interface GameBoardProps {
@@ -13,7 +13,7 @@ interface GameBoardProps {
   letterStates: { [key: string]: LetterState[] };
 }
 
-export default function GameBoard({
+function GameBoard({
   guesses,
   currentGuess,
   word,
@@ -23,30 +23,10 @@ export default function GameBoard({
 }: GameBoardProps) {
   const { isAccessibilityMode } = useAccessibility();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const currentRowRef = useRef<HTMLDivElement>(null);
   
   // Calculate scroll needs early - add safety check
   const safeMaxGuesses = Math.max(1, Math.min(maxGuesses || 6, 999));
   const needsVerticalScroll = safeMaxGuesses > 8;
-  
-  // Auto-scroll to current row when guesses change
-  useEffect(() => {
-    if (currentRowRef.current && scrollContainerRef.current && needsVerticalScroll) {
-      const currentRow = currentRowRef.current;
-      
-      // Scroll when we have enough rows and are actively playing
-      if (guesses.length >= 5) {
-        // Small delay to ensure the DOM has updated
-        setTimeout(() => {
-          currentRow.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'nearest'
-          });
-        }, 100);
-      }
-    }
-  }, [guesses.length, currentGuess, needsVerticalScroll]);
   
   const getTileSize = (length: number) => {
     if (length === 1) return 'w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24';
@@ -83,8 +63,7 @@ export default function GameBoard({
     
     return (
       <div 
-        key={rowIndex} 
-        ref={isCurrentRow ? currentRowRef : null}
+        key={rowIndex}
         className={`flex ${getGapSize(wordLength)} justify-center mb-2 sm:mb-3`}
       >
         {Array.from({ length: wordLength }, (_, i) => {
@@ -277,4 +256,6 @@ export default function GameBoard({
       </div>
     </div>
   );
-} 
+}
+
+export default memo(GameBoard); 

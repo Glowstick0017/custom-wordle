@@ -324,11 +324,8 @@ function PlayGameContent() {
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
         {!isAccessibilityMode && (
           <>
-            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
-            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
-            <div className="absolute top-60 left-1/3 w-28 h-28 bg-gradient-to-r from-cyan-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
-            <div className="absolute bottom-40 right-1/4 w-24 h-24 bg-gradient-to-r from-pink-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
-            <div className="absolute top-10 right-1/3 w-20 h-20 bg-gradient-to-r from-orange-500/22 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
+            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/15 to-transparent rounded-full blur-xl"></div>
+            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/15 to-transparent rounded-full blur-xl"></div>
           </>
         )}
         <div className="text-center glass-card p-8 rounded-xl relative z-10">
@@ -353,11 +350,8 @@ function PlayGameContent() {
 
         {!isAccessibilityMode && (
           <>
-            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
-            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
-            <div className="absolute top-60 right-1/4 w-28 h-28 bg-gradient-to-r from-teal-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
-            <div className="absolute bottom-40 left-1/3 w-24 h-24 bg-gradient-to-r from-indigo-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
-            <div className="absolute top-10 left-1/4 w-36 h-36 bg-gradient-to-r from-cyan-500/12 to-transparent rounded-full blur-xl animate-pulse delay-800"></div>
+            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/15 to-transparent rounded-full blur-xl"></div>
+            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/15 to-transparent rounded-full blur-xl"></div>
           </>
         )}
         <div className="max-w-md w-full text-center space-y-6 glass-card p-8 rounded-xl relative z-10">
@@ -378,17 +372,11 @@ function PlayGameContent() {
 
   return (
     <div className="min-h-screen h-screen flex flex-col max-w-screen overflow-x-hidden relative">
-      {/* Background gradient orbs - hidden in accessibility mode */}
+      {/* Background gradient orbs - REDUCED FOR PERFORMANCE */}
       {!isAccessibilityMode && (
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-full blur-xl animate-pulse"></div>
-          <div className="absolute bottom-40 left-10 w-32 h-32 bg-gradient-to-r from-purple-500/10 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
-          <div className="absolute top-1/2 right-20 w-24 h-24 bg-gradient-to-r from-orange-500/10 to-transparent rounded-full blur-xl animate-pulse delay-1000"></div>
-          <div className="absolute top-20 left-1/3 w-36 h-36 bg-gradient-to-r from-cyan-500/8 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
-          <div className="absolute bottom-20 right-1/3 w-28 h-28 bg-gradient-to-r from-pink-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1500"></div>
-          <div className="absolute top-3/4 left-20 w-20 h-20 bg-gradient-to-r from-indigo-500/12 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
-          <div className="absolute top-60 right-5 w-16 h-16 bg-gradient-to-r from-teal-500/10 to-transparent rounded-full blur-xl animate-pulse delay-2000"></div>
-          <div className="absolute bottom-60 left-5 w-22 h-22 bg-gradient-to-r from-violet-500/8 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
+          <div className="absolute top-10 right-10 w-40 h-40 bg-gradient-to-r from-emerald-500/8 to-transparent rounded-full blur-xl"></div>
+          <div className="absolute bottom-40 left-10 w-32 h-32 bg-gradient-to-r from-purple-500/8 to-transparent rounded-full blur-xl"></div>
         </div>
       )}
 
@@ -579,12 +567,8 @@ function LoadingFallback() {
   // Note: This component can't use useAccessibility because it's outside the provider
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/20 to-transparent rounded-full blur-xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/20 to-transparent rounded-full blur-xl animate-pulse delay-700"></div>
-      <div className="absolute top-60 left-1/2 w-28 h-28 bg-gradient-to-r from-cyan-500/15 to-transparent rounded-full blur-xl animate-pulse delay-500"></div>
-      <div className="absolute bottom-40 left-1/4 w-24 h-24 bg-gradient-to-r from-pink-500/18 to-transparent rounded-full blur-xl animate-pulse delay-1200"></div>
-      <div className="absolute top-10 right-1/4 w-20 h-20 bg-gradient-to-r from-orange-500/22 to-transparent rounded-full blur-xl animate-pulse delay-300"></div>
-      <div className="absolute bottom-60 right-1/3 w-36 h-36 bg-gradient-to-r from-indigo-500/12 to-transparent rounded-full blur-xl animate-pulse delay-1800"></div>
+      <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/15 to-transparent rounded-full blur-xl"></div>
+      <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/15 to-transparent rounded-full blur-xl"></div>
       <div className="text-center glass-card p-8 rounded-xl relative z-10">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-emerald-400 border-r-purple-400 border-b-orange-400 mx-auto mb-4"></div>
         <p className="text-white/90 text-xl">Loading game...</p>

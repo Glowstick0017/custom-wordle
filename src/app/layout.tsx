@@ -50,9 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen text-white relative`}>
-        {/* Background gradient layers - will be hidden via CSS in accessibility mode */}
-        <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 gradient-bg-layer" id="bg-layer-1"></div>
-        <div className="fixed inset-0 bg-gradient-to-br from-emerald-500/15 via-purple-500/10 to-cyan-500/15 pointer-events-none bg-gradient-animated gradient-bg-layer" id="bg-layer-2"></div>
+        {/* Simplified background - removed expensive animated gradients for performance */}
         
         {/* Content */}
         <div className="relative z-10 min-h-screen flex flex-col">

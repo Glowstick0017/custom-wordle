@@ -18,11 +18,9 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center" role="dialog" aria-modal="true">
-      {/* Backdrop */}
+      {/* Backdrop - removed expensive backdrop-blur */}
       <div 
-        className={`absolute inset-0 bg-black bg-opacity-80 ${
-          isAccessibilityMode ? '' : 'transition-opacity backdrop-blur-md'
-        }`}
+        className="absolute inset-0 bg-black bg-opacity-80"
         onClick={onClose}
       />
       

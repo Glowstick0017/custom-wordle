@@ -3,6 +3,7 @@
 import { KeyboardKey } from '@/types/game';
 import { Delete, CornerDownLeft } from 'lucide-react';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
+import { memo } from 'react';
 
 interface KeyboardProps {
   onKeyPress: (key: string) => void;
@@ -12,7 +13,7 @@ interface KeyboardProps {
   disabled: boolean;
 }
 
-export default function Keyboard({
+function Keyboard({
   onKeyPress,
   onEnter,
   onBackspace,
@@ -140,4 +141,6 @@ export default function Keyboard({
       </div>
     </div>
   );
-} 
+}
+
+export default memo(Keyboard); 
