@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   
   // Experimental features for better performance
   experimental: {
-    optimizeCss: true,
+    // Removed optimizeCss - requires critters package
     optimizePackageImports: ['lucide-react'],
   },
 };
