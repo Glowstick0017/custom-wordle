@@ -1,4 +1,4 @@
-import { GameState, LetterState, GameStats } from '@/types/game';
+import { LetterState, GameStats } from '@/types/game';
 import { encryptWordle } from './encryption';
 
 export function checkGuess(guess: string, word: string): LetterState[] {

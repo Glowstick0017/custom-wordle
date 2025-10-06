@@ -26,7 +26,6 @@ function GameBoard({
   
   // Calculate scroll needs early - add safety check
   const safeMaxGuesses = Math.max(1, Math.min(maxGuesses || 6, 999));
-  const needsVerticalScroll = safeMaxGuesses > 8;
   
   const getTileSize = (length: number) => {
     if (length === 1) return 'w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24';

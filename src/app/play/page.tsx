@@ -46,29 +46,6 @@ function PlayGameContent() {
   const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
   const [currentGameId, setCurrentGameId] = useState<string | null>(null);
 
-  const resetAllGameState = useCallback(() => {
-    setGameState({
-      word: '',
-      guesses: [],
-      currentGuess: '',
-      gameStatus: 'playing',
-      maxGuesses: 6,
-      wordLength: 5,
-      hardMode: false,
-      hint: undefined
-    });
-    setLetterStates({});
-    setKeyStates({});
-    setShowGameOver(false);
-    setShowStats(false);
-    setShowCreate(false);
-    setShowHowToPlay(false);
-    setShareText('');
-    setWordDefinition(null);
-    setIsLoadingDefinition(false);
-    setCurrentGameId(null);
-  }, []);
-
   // Initialize game from URL parameter
   useEffect(() => {
     const encryptedData = searchParams.get('w');
@@ -244,7 +221,7 @@ function PlayGameContent() {
 
     // Handle game end
     if (won || lost) {
-      const stats = updateStats(won, newGuesses.length);
+      updateStats(won, newGuesses.length);
       const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode, gameState.realWordsOnly, gameState.hint);
       setShareText(shareTextContent);
       

@@ -204,7 +204,7 @@ function DailyGameContent() {
 
     // Handle game end
     if (won || lost) {
-      const stats = updateStats(won, newGuesses.length);
+      updateStats(won, newGuesses.length);
       const shareTextContent = generateDailyShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses);
       setShareText(shareTextContent);
       
