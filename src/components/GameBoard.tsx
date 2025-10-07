@@ -90,15 +90,17 @@ function GameBoard({
 
   const getLetterStyle = (state: string, letter: string, isCurrentRow: boolean) => {
     if (!letter) {
+      // Empty tiles (not yet played) - make them more subtle
       return isAccessibilityMode 
-        ? 'border-white/40 bg-gray-800 text-white/70'
-        : 'border-white/20 glass-card text-white/50';
+        ? 'border-white/20 bg-gray-900 text-white/50'
+        : 'border-white/10 bg-white/5 text-white/30';
     }
     
     if (isCurrentRow) {
+      // Current guess tiles - make them stand out more
       return isAccessibilityMode
-        ? 'border-white/60 bg-gray-700 text-white'
-        : 'border-white/40 glass-card text-white';
+        ? 'border-white/80 bg-gray-600 text-white scale-105'
+        : 'border-white/60 bg-white/10 text-white scale-105 shadow-lg shadow-white/10';
     }
     
     if (isAccessibilityMode) {
@@ -110,7 +112,7 @@ function GameBoard({
         case 'absent':
           return 'border-gray-400 bg-gray-600 text-white'; // High contrast gray
         default:
-          return 'border-white/40 bg-gray-800 text-white/70';
+          return 'border-white/20 bg-gray-900 text-white/50';
       }
     }
     
@@ -120,9 +122,9 @@ function GameBoard({
       case 'present':
         return 'border-yellow-400 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40';
       case 'absent':
-        return 'border-white/30 glass-card text-white/70 shadow-lg shadow-black/20';
+        return 'border-gray-700 bg-gray-800 text-white/70 shadow-lg shadow-black/30';
       default:
-        return 'border-white/20 glass-card text-white/50';
+        return 'border-white/10 bg-white/5 text-white/30';
     }
   };
 
