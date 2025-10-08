@@ -17,6 +17,7 @@ import { getDailyWord, getDailyGameDate } from '@/utils/dailyGame';
 import { checkGuess, isValidWord, generateDailyShareText, updateStats, getStoredStats, validateHardModeGuess, validateRealWord, fetchWordDefinition } from '@/utils/gameLogic';
 import { saveGameSession, loadGameSession, clearOutdatedDailySessions, clearGameSession } from '@/utils/gameSession';
 import { GameState, LetterState, KeyboardKey } from '@/types/game';
+import LoadingGame from '@/components/LoadingGame';
 
 function DailyGameContent() {
   const router = useRouter();
@@ -33,7 +34,7 @@ function DailyGameContent() {
     realWordsOnly: true,
     hint: undefined
   });
-  
+
   const [letterStates, setLetterStates] = useState<{ [key: string]: LetterState[] }>({});
   const [keyStates, setKeyStates] = useState<{ [key: string]: KeyboardKey }>({});
   const [showGameOver, setShowGameOver] = useState(false);
@@ -54,24 +55,24 @@ function DailyGameContent() {
 
         // Try to load saved session first
         const savedSession = loadGameSession('daily');
-        
+
         if (savedSession) {
           // Restore saved game state
           setGameState(savedSession.gameState);
           setLetterStates(savedSession.letterStates);
           setKeyStates(savedSession.keyStates);
           setGameLoaded(true);
-          
+
           // If the game was already complete, show the game over modal
           if (savedSession.gameState.gameStatus === 'won' || savedSession.gameState.gameStatus === 'lost') {
             const shareTextContent = generateDailyShareText(
-              savedSession.gameState.guesses, 
-              savedSession.gameState.word, 
-              savedSession.gameState.gameStatus, 
+              savedSession.gameState.guesses,
+              savedSession.gameState.word,
+              savedSession.gameState.gameStatus,
               savedSession.gameState.maxGuesses
             );
             setShareText(shareTextContent);
-            
+
             // Fetch word definition for completed games
             setIsLoadingDefinition(true);
             fetchWordDefinition(savedSession.gameState.word, showAlert)
@@ -83,7 +84,7 @@ function DailyGameContent() {
                 setWordDefinition(null);
                 setIsLoadingDefinition(false);
               });
-            
+
             // Show the game over modal after a brief delay
             setTimeout(() => setShowGameOver(true), 500);
           }
@@ -118,7 +119,7 @@ function DailyGameContent() {
   // Handle keyboard input
   const handleKeyPress = useCallback((key: string) => {
     if (gameState.gameStatus !== 'playing') return;
-    
+
     if (gameState.currentGuess.length < gameState.wordLength) {
       setGameState(prev => ({
         ...prev,
@@ -129,7 +130,7 @@ function DailyGameContent() {
 
   const handleBackspace = useCallback(() => {
     if (gameState.gameStatus !== 'playing') return;
-    
+
     setGameState(prev => ({
       ...prev,
       currentGuess: prev.currentGuess.slice(0, -1)
@@ -142,14 +143,14 @@ function DailyGameContent() {
       showAlert(`Word must be ${gameState.wordLength} letters long`, 'error');
       return;
     }
-    
+
     if (!isValidWord(gameState.currentGuess, gameState.wordLength)) {
       showAlert('Please enter a valid word with only letters', 'error');
       return;
     }
 
     const guess = gameState.currentGuess.toUpperCase();
-    
+
     // Check real word validation (always enabled for daily games)
     if (gameState.realWordsOnly) {
       const realWordValidation = await validateRealWord(guess, showAlert);
@@ -158,7 +159,7 @@ function DailyGameContent() {
         return;
       }
     }
-    
+
     // Check hard mode validation
     if (gameState.hardMode) {
       const hardModeValidation = validateHardModeGuess(guess, gameState.guesses, gameState.word);
@@ -167,10 +168,10 @@ function DailyGameContent() {
         return;
       }
     }
-    
+
     const newLetterStates = checkGuess(guess, gameState.word);
     const newGuesses = [...gameState.guesses, guess];
-    
+
     // Update letter states
     setLetterStates(prev => ({
       ...prev,
@@ -181,7 +182,7 @@ function DailyGameContent() {
     const newKeyStates = { ...keyStates };
     newLetterStates.forEach(({ letter, status }) => {
       if (status !== 'empty') {
-        if (!newKeyStates[letter] || 
+        if (!newKeyStates[letter] ||
             (newKeyStates[letter].status !== 'correct' && status === 'correct') ||
             (newKeyStates[letter].status === 'unused' && status === 'present')) {
           newKeyStates[letter] = { key: letter, status: status as 'correct' | 'present' | 'absent' };
@@ -207,7 +208,7 @@ function DailyGameContent() {
       updateStats(won, newGuesses.length);
       const shareTextContent = generateDailyShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses);
       setShareText(shareTextContent);
-      
+
       // Fetch word definition
       setIsLoadingDefinition(true);
       fetchWordDefinition(gameState.word, showAlert)
@@ -219,7 +220,7 @@ function DailyGameContent() {
           setWordDefinition(null);
           setIsLoadingDefinition(false);
         });
-      
+
       setTimeout(() => setShowGameOver(true), 1000);
     }
   }, [gameState, keyStates, showAlert]);
@@ -229,9 +230,9 @@ function DailyGameContent() {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't handle keyboard events when any modal is open
       if (showGameOver || showStats || showCreate || showHowToPlay) return;
-      
+
       if (event.metaKey || event.ctrlKey || event.altKey) return;
-      
+
       if (event.key === 'Enter') {
         event.preventDefault();
         handleEnter();
@@ -262,7 +263,7 @@ function DailyGameContent() {
   const resetGame = () => {
     // Clear the saved session first, then reset game state
     clearGameSession('daily');
-    
+
     setGameState(prev => ({
       ...prev,
       guesses: [],
@@ -278,24 +279,7 @@ function DailyGameContent() {
   };
 
   if (!gameLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {!isAccessibilityMode && (
-          <>
-            <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-500/15 to-transparent rounded-full blur-xl"></div>
-            <div className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-purple-500/15 to-transparent rounded-full blur-xl"></div>
-          </>
-        )}
-        <div className="text-center glass-card p-8 rounded-xl relative z-10">
-          <div className={`rounded-full h-12 w-12 border-4 border-transparent mx-auto mb-4 ${
-            isAccessibilityMode 
-              ? 'border-t-white animate-spin' 
-              : 'border-t-emerald-400 border-r-purple-400 border-b-orange-400 animate-spin'
-          }`}></div>
-          <p className="text-white/90 text-lg">Loading daily game...</p>
-        </div>
-      </div>
-    );
+    return <LoadingGame label={"Loading daily game..."} isAccessibilityMode={isAccessibilityMode}/>
   }
 
   return (
@@ -329,13 +313,13 @@ function DailyGameContent() {
                 <Info className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
               </button>
             </div>
-            
+
             {/* Center content */}
             <div className="text-center min-w-0">
               <div className="flex items-center justify-center gap-1 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
                 <h1 className={`text-lg sm:text-xl font-bold ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>Daily Glowdle</h1>
               </div>
-              
+
               <div className="text-xs text-white/70 leading-tight sm:leading-relaxed space-y-0.5 sm:space-y-1">
                 <div>{getDailyGameDate()}</div>
                 <div>{gameState.wordLength} letters • {gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses</div>
@@ -426,7 +410,7 @@ function DailyGameContent() {
               <Share2 size={18} />
               Share Results
             </button>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={resetGame}
@@ -435,7 +419,7 @@ function DailyGameContent() {
                 <RotateCcw size={16} />
                 Play Again
               </button>
-              
+
               <button
                 onClick={() => {
                   setShowGameOver(false);
