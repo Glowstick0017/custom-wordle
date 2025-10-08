@@ -23,6 +23,7 @@ function DailyGameContent() {
   const router = useRouter();
   const { showAlert, AlertComponent } = useAlert(true);
   const { isAccessibilityMode } = useAccessibility();
+  const stats = getStoredStats();
   const [gameState, setGameState] = useState<GameState>({
     word: '',
     guesses: [],
@@ -293,76 +294,123 @@ function DailyGameContent() {
       )}
 
       {/* Header */}
-      <header className="flex-shrink-0 glass-card border-b border-white/10 p-2 sm:p-4 relative z-0">
-        <div className="max-w-lg mx-auto">
-          <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2 sm:gap-4">
-            {/* Left buttons */}
-            <div className="flex gap-1 sm:gap-2 shrink-0">
+      <header className="flex-shrink-0 glass-card border-b border-white/10 px-3 py-2 relative z-0">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
               <Link
                 href="/"
-                className="p-2 sm:p-3 glass-card glass-card-hover rounded-lg sm:rounded-xl transition-all duration-300 text-white/80 hover:text-white flex items-center justify-center"
+                className="p-2 rounded-md text-white/80 hover:text-white bg-transparent hover:bg-white/2"
+                aria-label="Back"
               >
-                <ArrowLeft className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                <ArrowLeft className="w-5 h-5" />
               </Link>
               <button
                 onClick={() => setShowHowToPlay(true)}
-                className="p-2 sm:p-3 glass-card glass-card-hover rounded-lg sm:rounded-xl transition-all duration-300 text-white/80 hover:text-white flex items-center justify-center"
+                className="p-2 rounded-md text-white/80 hover:text-white bg-transparent hover:bg-white/2"
                 title="How to Play"
                 aria-label="How to Play"
               >
-                <Info className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                <Info className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Center content */}
-            <div className="text-center min-w-0">
-              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
-                <h1 className={`text-lg sm:text-xl font-bold ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>Daily Glowdle</h1>
+            <div className="text-center flex-1 px-4 min-w-0">
+              <div className="flex items-center justify-center gap-3">
+                <h1 className={`text-2xl md:text-3xl lg:text-4xl font-extrabold truncate ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>Daily Glowdle</h1>
               </div>
-
-              <div className="text-xs text-white/70 leading-tight sm:leading-relaxed space-y-0.5 sm:space-y-1">
-                <div>{getDailyGameDate()}</div>
-                <div>{gameState.wordLength} letters • {gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses</div>
-                <div className="text-blue-300 font-medium">Real words only</div>
+              <div className="mt-1 text-sm md:text-base text-white/70 flex items-center justify-center gap-3">
+                <span className="truncate">{getDailyGameDate()}</span>
+                <span className="hidden sm:inline">•</span>
+                <span>{gameState.wordLength} letters</span>
+                <span>•</span>
+                <span>{gameState.maxGuesses === Infinity ? '∞' : gameState.maxGuesses} guesses</span>
               </div>
             </div>
 
-            {/* Right buttons */}
-            <div className="flex gap-1 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-2">
               <AccessibilityToggle showText={false} />
               <button
                 onClick={() => setShowStats(true)}
-                className="p-2 sm:p-3 glass-card glass-card-hover rounded-lg sm:rounded-xl transition-all duration-300 text-white/80 hover:text-white flex items-center justify-center"
+                className="p-2 rounded-md text-white/80 hover:text-white bg-transparent hover:bg-white/2"
+                aria-label="Stats"
               >
-                <BarChart3 className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
+                <BarChart3 className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Game Area - takes remaining space */}
-      <div className="flex-1 min-h-0 overflow-hidden px-2 sm:px-4">
-        <GameBoard
-          guesses={gameState.guesses}
-          currentGuess={gameState.currentGuess}
-          word={gameState.gameStatus !== 'playing' ? gameState.word : ''}
-          maxGuesses={gameState.maxGuesses}
-          wordLength={gameState.wordLength}
-          letterStates={letterStates}
-        />
-      </div>
+      {/* Main content: responsive two-column layout on desktop */}
+      <main className="flex-1 overflow-hidden px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] gap-6 items-start">
+            {/* Left: board + keyboard (centered and capped width for PC) */}
+            <div className="flex flex-col items-center w-full">
+              <div className="w-full max-w-[min(560px,80vw)]">
+                <GameBoard
+                  guesses={gameState.guesses}
+                  currentGuess={gameState.currentGuess}
+                  word={gameState.gameStatus !== 'playing' ? gameState.word : ''}
+                  maxGuesses={gameState.maxGuesses}
+                  wordLength={gameState.wordLength}
+                  letterStates={letterStates}
+                />
+              </div>
 
-      {/* Keyboard - always at bottom */}
-      <div className="flex-shrink-0 pb-safe px-2">
-        <Keyboard
-          onKeyPress={handleKeyPress}
-          onEnter={handleEnter}
-          onBackspace={handleBackspace}
-          keyStates={keyStates}
-          disabled={gameState.gameStatus !== 'playing'}
-        />
-      </div>
+              <div className="w-full mt-4">
+                <div className="w-full max-w-[min(560px,80vw)] mx-auto">
+                  <Keyboard
+                    onKeyPress={handleKeyPress}
+                    onEnter={handleEnter}
+                    onBackspace={handleBackspace}
+                    keyStates={keyStates}
+                    disabled={gameState.gameStatus !== 'playing'}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right: controls / stats / actions */}
+            <aside className="block md:block mt-6 md:mt-0">
+              <div className="glass-card p-4 rounded-xl border border-white/10 space-y-4 w-full">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold">Daily Controls</h3>
+                </div>
+
+                <div className="space-y-2">
+                  <button onClick={handleShare} className="w-full btn-gradient-primary py-2 rounded-md">Share Results</button>
+                  <button onClick={resetGame} className="w-full btn-gradient-secondary py-2 rounded-md">Play Again</button>
+                  <button onClick={() => setShowCreate(true)} className="w-full btn-gradient-accent py-2 rounded-md">Create Custom</button>
+                  <button onClick={() => setShowStats(true)} className="w-full glass-card py-2 rounded-md">View Stats</button>
+                </div>
+
+                <div className="pt-2 border-t border-white/5">
+                  <div className="text-sm text-white/70">Statistics</div>
+                  <div className="mt-2 text-sm">
+                    <div>Played: <strong>{stats.gamesPlayed}</strong></div>
+                    <div>Won: <strong>{stats.gamesWon}</strong></div>
+                    <div>Current Streak: <strong>{stats.currentStreak}</strong></div>
+                    <div>Max Streak: <strong>{stats.maxStreak}</strong></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-sm text-white/70">Definition</div>
+                  {isLoadingDefinition ? (
+                    <div className="mt-2 text-sm">Loading...</div>
+                  ) : wordDefinition ? (
+                    <div className="mt-2 text-sm">{wordDefinition.definition}</div>
+                  ) : (
+                    <div className="mt-2 text-sm text-white/60">Definition will appear after the game ends.</div>
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </main>
 
       {/* Game Over Modal */}
       <Modal

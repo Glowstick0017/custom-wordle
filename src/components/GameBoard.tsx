@@ -29,13 +29,13 @@ function GameBoard({
   
   const getTileSize = (length: number) => {
     if (length === 1) return 'w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24';
-    if (length <= 3) return 'w-12 h-12 sm:w-16 sm:h-16 md:w-18 md:h-18';
-    if (length <= 5) return 'w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16';
-    if (length <= 7) return 'w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14';
-    if (length <= 10) return 'w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12';
-    if (length <= 15) return 'w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10';
-    if (length <= 20) return 'w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8';
-    return 'w-3 h-3 sm:w-5 sm:h-5 md:w-6 md:h-6';
+    if (length <= 3) return 'w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20';
+    if (length <= 5) return 'w-11 h-11 sm:w-14 sm:h-14 md:w-18 md:h-18';
+    if (length <= 7) return 'w-9 h-9 sm:w-12 sm:h-12 md:w-16 md:h-16';
+    if (length <= 10) return 'w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14';
+    if (length <= 15) return 'w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12';
+    if (length <= 20) return 'w-5 h-5 sm:w-6 sm:h-6 md:w-10 md:h-10';
+    return 'w-4 h-4 sm:w-5 sm:h-5 md:w-8 md:h-8';
   };
   
   const getFontSize = (length: number) => {
@@ -73,12 +73,13 @@ function GameBoard({
             <div
               key={i}
               className={`
-                ${getTileSize(wordLength)}
-                border-2 flex items-center justify-center
-                ${getFontSize(wordLength)} font-bold
-                transition-all duration-300
-                ${getLetterStyle(state, letter, isCurrentRow)}
-              `}
+                    ${getTileSize(wordLength)}
+                    border-2 flex items-center justify-center
+                    ${getFontSize(wordLength)} font-extrabold
+                    transition-all duration-200 ease-in-out
+                    rounded-lg
+                    ${getLetterStyle(state, letter, isCurrentRow)}
+                  `}
             >
               {letter.toUpperCase()}
             </div>
@@ -90,41 +91,42 @@ function GameBoard({
 
   const getLetterStyle = (state: string, letter: string, isCurrentRow: boolean) => {
     if (!letter) {
-      // Empty tiles (not yet played) - make them more subtle
-      return isAccessibilityMode 
-        ? 'border-white/20 bg-gray-900 text-white/50'
-        : 'border-white/10 bg-white/5 text-white/30';
-    }
-    
-    if (isCurrentRow) {
-      // Current guess tiles - make them stand out more
+      // Empty tiles (not yet played) - subtle neutral background
       return isAccessibilityMode
-        ? 'border-white/80 bg-gray-600 text-white scale-105'
-        : 'border-white/60 bg-white/10 text-white scale-105 shadow-lg shadow-white/10';
+        ? 'border-white/20 bg-gray-900 text-white/50'
+        : 'border-white/12 bg-gray-900/30 text-white/60';
     }
-    
+
+    if (isCurrentRow) {
+      // Current guess tiles - subtle highlight
+      return isAccessibilityMode
+        ? 'border-white/80 bg-gray-600 text-white scale-102'
+        : 'border-white/40 bg-gray-800 text-white scale-102';
+    }
+
     if (isAccessibilityMode) {
       switch (state) {
         case 'correct':
-          return 'border-orange-400 bg-orange-600 text-white'; // High contrast orange
+          return 'border-orange-400 bg-orange-600 text-white';
         case 'present':
-          return 'border-blue-400 bg-blue-600 text-white'; // High contrast blue
+          return 'border-blue-400 bg-blue-600 text-white';
         case 'absent':
-          return 'border-gray-400 bg-gray-600 text-white'; // High contrast gray
+          return 'border-gray-400 bg-gray-600 text-white';
         default:
           return 'border-white/20 bg-gray-900 text-white/50';
       }
     }
-    
+
+    // Desktop-friendly, lower-contrast fills (avoid heavy gradients)
     switch (state) {
       case 'correct':
-        return 'border-emerald-400 btn-gradient-primary text-white shadow-lg shadow-emerald-500/40';
+        return 'border-emerald-400 bg-emerald-600 text-white';
       case 'present':
-        return 'border-yellow-400 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40';
+        return 'border-yellow-400 bg-yellow-600 text-white';
       case 'absent':
-        return 'border-gray-700 bg-gray-800 text-white/70 shadow-lg shadow-black/30';
+        return 'border-gray-700 bg-gray-800 text-white/80';
       default:
-        return 'border-white/10 bg-white/5 text-white/30';
+        return 'border-white/12 bg-gray-900/30 text-white/60';
     }
   };
 

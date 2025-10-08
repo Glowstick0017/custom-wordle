@@ -240,7 +240,7 @@ function PlayGameContent() {
 
       setTimeout(() => setShowGameOver(true), 1000);
     }
-  }, [gameState, keyStates]);
+  }, [gameState, keyStates, showAlert]);
 
   // Physical keyboard support
   useEffect(() => {
@@ -366,7 +366,7 @@ function PlayGameContent() {
             {/* Center content */}
             <div className="text-center min-w-0">
               <div className="flex items-center justify-center gap-1 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
-                <h1 className={`text-lg sm:text-xl font-bold ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>Glowdle</h1>
+                <h1 className={`text-xl md:text-2xl lg:text-3xl font-bold ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>Glowdle</h1>
                 {gameState.hardMode && (
                   <div className="px-1.5 py-0.5 sm:px-2 sm:py-1 btn-gradient-accent text-white text-xs font-bold rounded-full shadow-lg">
                     <div className="flex items-center gap-0.5 sm:gap-1">
