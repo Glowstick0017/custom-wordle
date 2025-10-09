@@ -1,7 +1,7 @@
 'use client';
 
-import Modal from './Modal';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
+import Modal from './Modal';
 
 interface HowToPlayModalProps {
   isOpen: boolean;
@@ -77,7 +77,7 @@ export default function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps)
           
           <div className="space-y-4">
             {/* Correct Example */}
-            <div className="flex items-center gap-4">
+            <div className="block md:flex justify-center items-center gap-4 space-y-4">
               <div className="flex gap-1">
                 <ExampleTile letter="W" status="empty" />
                 <ExampleTile letter="E" status="correct" />
@@ -95,7 +95,7 @@ export default function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps)
             </div>
 
             {/* Present Example */}
-            <div className="flex items-center gap-4">
+            <div className="block md:flex justify-center items-center gap-4 space-y-4">
               <div className="flex gap-1">
                 <ExampleTile letter="P" status="present" />
                 <ExampleTile letter="I" status="empty" />
@@ -113,7 +113,7 @@ export default function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps)
             </div>
 
             {/* Absent Example */}
-            <div className="flex items-center gap-4">
+            <div className="block md:flex justify-center items-center gap-4 space-y-4">
               <div className="flex gap-1">
                 <ExampleTile letter="V" status="empty" />
                 <ExampleTile letter="A" status="empty" />
