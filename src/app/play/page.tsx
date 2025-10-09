@@ -145,11 +145,6 @@ function PlayGameContent() {
   // Timer countdown effect
   useEffect(() => {
     if (!gameState.timeTrialMode || gameState.gameStatus !== 'playing' || !timerStarted) {
-      console.log('Timer not starting:', { 
-        timeTrialMode: gameState.timeTrialMode, 
-        gameStatus: gameState.gameStatus, 
-        timerStarted 
-      });
       return;
     }
 
@@ -157,8 +152,6 @@ function PlayGameContent() {
     if (showGameOver || showStats || showCreate || showHowToPlay) {
       return;
     }
-
-    console.log('Timer started! Time remaining:', gameState.timeRemaining);
 
     const timer = setInterval(() => {
       setGameState(prev => {
@@ -525,10 +518,6 @@ function PlayGameContent() {
               timeLimit={gameState.timeLimit || 60}
               isPaused={showGameOver || showStats || showCreate || showHowToPlay}
             />
-            {/* Debug info */}
-            <div className="text-xs text-white/50 text-center mt-1">
-              Debug: TR={gameState.timeRemaining} TL={gameState.timeLimit} Started={timerStarted ? 'Y' : 'N'}
-            </div>
           </div>
         )}
         
