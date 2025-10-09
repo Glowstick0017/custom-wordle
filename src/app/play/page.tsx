@@ -83,7 +83,9 @@ function PlayGameContent() {
             savedSession.gameState.maxGuesses,
             savedSession.gameState.hardMode,
             savedSession.gameState.realWordsOnly,
-            savedSession.gameState.hint
+            savedSession.gameState.hint,
+            savedSession.gameState.timeTrialMode,
+            savedSession.gameState.timeTaken
           );
           setShareText(shareTextContent);
 
@@ -169,7 +171,9 @@ function PlayGameContent() {
               prev.maxGuesses,
               prev.hardMode,
               prev.realWordsOnly,
-              prev.hint
+              prev.hint,
+              prev.timeTrialMode,
+              prev.timeTaken
             );
             setShareText(shareTextContent);
 
@@ -310,7 +314,17 @@ function PlayGameContent() {
     // Handle game end
     if (won || lost) {
       updateStats(won, newGuesses.length);
-      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode, gameState.realWordsOnly, gameState.hint);
+      const shareTextContent = generateShareText(
+        newGuesses, 
+        gameState.word, 
+        won ? 'won' : 'lost', 
+        gameState.maxGuesses, 
+        gameState.hardMode, 
+        gameState.realWordsOnly, 
+        gameState.hint,
+        gameState.timeTrialMode,
+        gameState.timeTaken
+      );
       setShareText(shareTextContent);
 
       // Fetch word definition
