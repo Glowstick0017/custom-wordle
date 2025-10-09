@@ -24,6 +24,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [hardMode, setHardMode] = useState(false);
   const [realWordsOnly, setRealWordsOnly] = useState(false);
   const [hint, setHint] = useState('');
+  const [timeTrialMode, setTimeTrialMode] = useState(false);
+  const [timeLimit, setTimeLimit] = useState(60);
   const [isLoadingRandomWord, setIsLoadingRandomWord] = useState(false);
   const [isValidatingWord, setIsValidatingWord] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -60,7 +62,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       maxGuesses: isInfinite ? Infinity : maxGuesses,
       hardMode: hardMode,
       realWordsOnly: realWordsOnly,
-      hint: hint.trim() || undefined
+      hint: hint.trim() || undefined,
+      timeTrialMode: timeTrialMode,
+      timeLimit: timeTrialMode ? timeLimit : undefined
     };
 
     const encrypted = encryptWordle(wordleData);
@@ -85,6 +89,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setHardMode(false);
     setRealWordsOnly(false);
     setHint('');
+    setTimeTrialMode(false);
+    setTimeLimit(60);
     setIsLoadingRandomWord(false);
     setIsValidatingWord(false);
     setShowAdvanced(false);
@@ -113,13 +119,16 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   };
 
   const playNow = () => {
-    const encrypted = encryptWordle({
+    const playNowData = {
       word: word.toUpperCase(),
       maxGuesses: isInfinite ? Infinity : maxGuesses,
       hardMode: hardMode,
       realWordsOnly: realWordsOnly,
-      hint: hint.trim() || undefined
-    });
+      hint: hint.trim() || undefined,
+      timeTrialMode: timeTrialMode,
+      timeLimit: timeTrialMode ? timeLimit : undefined
+    };
+    const encrypted = encryptWordle(playNowData);
     router.push(`/play?w=${encrypted}`);
     handleClose();
   };
@@ -200,6 +209,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     {isInfinite ? 'Unlimited' : `${maxGuesses}`} guesses
                     {hardMode && ', Hard Mode'}
                     {realWordsOnly && ', Real Words Only'}
+                    {timeTrialMode && `, Time Trial (${timeLimit}s)`}
                     {hint && ', Custom hint'}
                   </div>
                 </div>
@@ -431,6 +441,78 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     </div>
                   </label>
                 </div>
+
+                {/* Time Trial Mode Toggle */}
+                <div className={`flex items-center justify-between p-3 rounded-lg border ${
+                  isAccessibilityMode 
+                    ? 'bg-gray-700 border-white/40' 
+                    : 'glass-card border-white/20'
+                }`}>
+                  <div className="flex-1">
+                    <label htmlFor="timeTrialMode" className="block text-sm font-medium text-white/90 cursor-pointer">
+                      ⏱️ Time Trial Mode
+                    </label>
+                    <p className="text-xs text-white/60 mt-1">
+                      Race against the clock to solve the puzzle
+                    </p>
+                  </div>
+                  
+                  <label htmlFor="timeTrialMode" className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="timeTrialMode"
+                      checked={timeTrialMode}
+                      onChange={(e) => setTimeTrialMode(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className={`relative rounded-full peer peer-focus:outline-none ${
+                      isAccessibilityMode 
+                        ? `w-11 h-6 border-2 ${timeTrialMode ? 'bg-purple-600 border-purple-400' : 'bg-gray-600 border-gray-400'} peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:shadow-sm`
+                        : 'w-11 h-6 bg-gray-200/20 peer-focus:ring-4 peer-focus:ring-purple-400/20 dark:bg-gray-700/50 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all duration-300 ease-in-out peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-purple-600 shadow-lg'
+                    }`}>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Time Limit Selector */}
+                {timeTrialMode && (
+                  <div className="glass-card p-4 rounded-lg border border-white/20">
+                    <label className="block text-sm font-medium text-white/90 mb-3">
+                      Time Limit
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[60, 90, 120].map((time) => (
+                        <button
+                          key={time}
+                          type="button"
+                          onClick={() => setTimeLimit(time)}
+                          className={`p-3 rounded-lg border-2 transition-all duration-300 ${
+                            isAccessibilityMode
+                              ? (timeLimit === time 
+                                ? 'border-purple-400 bg-purple-600 text-white' 
+                                : 'border-gray-400 bg-gray-700 text-white hover:bg-gray-600')
+                              : (timeLimit === time 
+                                ? 'border-purple-400 bg-gradient-to-br from-purple-500/30 to-purple-600/20 shadow-lg shadow-purple-500/40' 
+                                : 'border-white/20 glass-card hover:border-white/40')
+                          }`}
+                        >
+                          <div className="text-center">
+                            <div className={`text-lg font-bold ${
+                              isAccessibilityMode 
+                                ? 'text-white' 
+                                : (timeLimit === time ? 'gradient-text' : 'text-white/70')
+                            }`}>
+                              {time}s
+                            </div>
+                            <div className="text-xs text-white/60 mt-1">
+                              {time === 60 ? 'Fast' : time === 90 ? 'Medium' : 'Relaxed'}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -491,6 +573,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   <span className="font-bold text-blue-400">Real Words Only 📖</span>
                 </div>
               )}
+              {timeTrialMode && (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-white/70">Time Trial:</span>
+                  <span className="font-bold text-purple-400">⏱️ {timeLimit} seconds</span>
+                </div>
+              )}
               {hint && (
                 <div className="flex items-start gap-3">
                   <span className="text-sm font-medium text-white/70">Hint:</span>
@@ -534,6 +622,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 setHardMode(false);
                 setRealWordsOnly(false);
                 setHint('');
+                setTimeTrialMode(false);
+                setTimeLimit(60);
                 setIsLoadingRandomWord(false);
                 setIsValidatingWord(false);
                 setShowAdvanced(false);
