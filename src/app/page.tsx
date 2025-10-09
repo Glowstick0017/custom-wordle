@@ -29,7 +29,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Accessibility Toggle - Top Right */}
+      {/* Accessibility Toggle - Top Right (compact) */}
       <div className="absolute top-4 right-4 z-20">
         <AccessibilityToggle />
       </div>
@@ -42,17 +42,11 @@ export default function Home() {
         </>
       )}
       
-      <div className="max-w-md w-full space-y-8 relative z-10">
+  <div className="max-w-2xl w-full space-y-8 relative z-10">
         {/* Header */}
         <div className="text-center">
-          <h1 className={`text-4xl sm:text-6xl font-bold mb-4 drop-shadow-2xl ${
-            isAccessibilityMode ? 'text-white' : 'gradient-text'
-          }`}>
-            Glowdle
-          </h1>
-          <p className="text-white/80 text-sm sm:text-lg font-medium">
-            Create and play custom Wordle games
-          </p>
+          <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>Glowdle</h1>
+          <p className="text-white/80 text-sm sm:text-base md:text-lg font-medium">Create and play custom Wordle games</p>
         </div>
 
         {/* Action Buttons */}
