@@ -1,3 +1,4 @@
+
 'use client';
 
 import { LetterState } from '@/types/game';
@@ -24,7 +25,6 @@ function GameBoard({
   const { isAccessibilityMode } = useAccessibility();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // Calculate scroll needs early - add safety check
   const safeMaxGuesses = Math.max(1, Math.min(maxGuesses || 6, 999));
   
   const getTileSize = (length: number) => {
@@ -48,6 +48,7 @@ function GameBoard({
     if (length <= 20) return 'text-xs sm:text-xs md:text-sm';
     return 'text-xs sm:text-xs md:text-xs';
   };
+
   const renderRow = (guess: string, isCurrentRow: boolean, rowIndex: number) => {
     const letters = guess.split('');
     const states = letterStates[guess] || [];
@@ -63,7 +64,7 @@ function GameBoard({
     return (
       <div 
         key={rowIndex}
-        className={`flex ${getGapSize(wordLength)} justify-center mb-2 sm:mb-3`}
+        className={`flex ${getGapSize(wordLength)} justify-center mb-2 sm:mb-3 transition-all duration-300`}
       >
         {Array.from({ length: wordLength }, (_, i) => {
           const letter = letters[i] || '';
@@ -76,7 +77,8 @@ function GameBoard({
                 ${getTileSize(wordLength)}
                 border-2 flex items-center justify-center
                 ${getFontSize(wordLength)} font-bold
-                transition-all duration-300
+                transition-transform duration-200 ease-in-out
+                hover:scale-105
                 ${getLetterStyle(state, letter, isCurrentRow)}
               `}
             >
@@ -90,14 +92,12 @@ function GameBoard({
 
   const getLetterStyle = (state: string, letter: string, isCurrentRow: boolean) => {
     if (!letter) {
-      // Empty tiles (not yet played) - make them more subtle
       return isAccessibilityMode 
         ? 'border-white/20 bg-gray-900 text-white/50'
         : 'border-white/10 bg-white/5 text-white/30';
     }
     
     if (isCurrentRow) {
-      // Current guess tiles - make them stand out more
       return isAccessibilityMode
         ? 'border-white/80 bg-gray-600 text-white scale-105'
         : 'border-white/60 bg-white/10 text-white scale-105 shadow-lg shadow-white/10';
@@ -106,11 +106,11 @@ function GameBoard({
     if (isAccessibilityMode) {
       switch (state) {
         case 'correct':
-          return 'border-orange-400 bg-orange-600 text-white'; // High contrast orange
+          return 'border-orange-400 bg-orange-600 text-white';
         case 'present':
-          return 'border-blue-400 bg-blue-600 text-white'; // High contrast blue
+          return 'border-blue-400 bg-blue-600 text-white';
         case 'absent':
-          return 'border-gray-400 bg-gray-600 text-white'; // High contrast gray
+          return 'border-gray-400 bg-gray-600 text-white';
         default:
           return 'border-white/20 bg-gray-900 text-white/50';
       }
@@ -118,9 +118,9 @@ function GameBoard({
     
     switch (state) {
       case 'correct':
-        return 'border-emerald-400 btn-gradient-primary text-white shadow-lg shadow-emerald-500/40';
+        return 'border-emerald-400 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/40';
       case 'present':
-        return 'border-yellow-400 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40';
+        return 'border-yellow-400 bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 text-white shadow-lg shadow-yellow-500/40';
       case 'absent':
         return 'border-gray-700 bg-gray-800 text-white/70 shadow-lg shadow-black/30';
       default:
@@ -129,47 +129,23 @@ function GameBoard({
   };
 
   const rows = [];
+  guesses.forEach((guess, index) => rows.push(renderRow(guess, false, index)));
   
-  // Add completed guesses
-  guesses.forEach((guess, index) => {
-    rows.push(renderRow(guess, false, index));
-  });
-  
-  // Add current guess row if game is still active  
   const isGameActive = guesses.length < safeMaxGuesses && (!word || word === '');
-  if (isGameActive) {
-    rows.push(renderRow(currentGuess, true, guesses.length));
-  }
-  
-  // Calculate if we need scrolling and progressive row display
+  if (isGameActive) rows.push(renderRow(currentGuess, true, guesses.length));
+
   const currentRowOffset = isGameActive ? 1 : 0;
   const needsHorizontalScroll = wordLength > 15;
   const currentProgress = guesses.length + currentRowOffset;
   
-  // Progressive row display logic
   let maxVisibleRows;
-  if (safeMaxGuesses <= 6) {
-    // For 6 or fewer guesses, show all rows
-    maxVisibleRows = safeMaxGuesses;
-  } else {
-    // For more than 6 guesses, show progressively
-    if (currentProgress <= 5) {
-      maxVisibleRows = 6; // Start with 6 rows
-    } else if (currentProgress <= safeMaxGuesses - 1) {
-      maxVisibleRows = currentProgress + 1; // Show current + 1 ahead
-    } else {
-      maxVisibleRows = safeMaxGuesses; // Show all when at the end
-    }
-  }
+  if (safeMaxGuesses <= 6) maxVisibleRows = safeMaxGuesses;
+  else maxVisibleRows = currentProgress <= 5 ? 6 : currentProgress <= safeMaxGuesses - 1 ? currentProgress + 1 : safeMaxGuesses;
   
-  // Add empty rows up to the visible limit
   const remainingRows = Math.max(0, maxVisibleRows - guesses.length - currentRowOffset);
-  
-  for (let i = 0; i < remainingRows && guesses.length + i + currentRowOffset < maxVisibleRows; i++) {
+  for (let i = 0; i < remainingRows && guesses.length + i + currentRowOffset < maxVisibleRows; i++)
     rows.push(renderRow('', false, guesses.length + i + currentRowOffset));
-  }
   
-  // Show indicator if there are more rows available
   const isInfiniteGuesses = maxGuesses === Infinity;
   const hasMoreRows = isInfiniteGuesses || safeMaxGuesses > maxVisibleRows;
   const remainingGuesses = isInfiniteGuesses ? Infinity : safeMaxGuesses - maxVisibleRows;
@@ -182,41 +158,31 @@ function GameBoard({
     return 'max-w-full';
   };
 
-  // Update vertical scroll detection based on visible rows
   const needsVerticalScrollNow = maxVisibleRows > 8;
 
   return (
     <div className="w-full h-full flex items-center justify-center p-1 sm:p-2 overflow-hidden">
       <div className={`w-full ${getContainerSize(wordLength)} h-full max-h-full overflow-hidden`}>
         {needsVerticalScrollNow ? (
-          // Scrollable container for many visible rows
           <div 
             ref={scrollContainerRef}
-            className={`
-              h-full overflow-y-auto
-              ${needsHorizontalScroll ? 'overflow-x-auto' : ''}
-              game-board-scroll
-            `}
+            className={`h-full overflow-y-auto ${needsHorizontalScroll ? 'overflow-x-auto' : ''} game-board-scroll`}
           >
-            <div className={`
-              py-4 px-2
-              ${needsHorizontalScroll ? 'min-w-max' : ''}
-            `}>
+            <div className={`py-4 px-2 ${needsHorizontalScroll ? 'min-w-max' : ''} transition-all`}>
               {rows}
               {hasMoreRows && (
                 <div className="flex justify-center mt-4 mb-2">
-                  <div className="glass-card px-4 py-2 rounded-full border border-white/20">
-                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                  <div className="glass-card px-4 py-2 rounded-full border border-white/20 bg-black/20 backdrop-blur-md">
+                    <div className="flex items-center gap-2 text-white/70 text-sm">
                       <div className="flex gap-1">
                         <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse"></div>
-                        <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-100"></div>
-                        <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-200"></div>
+                        <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-150"></div>
+                        <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-300"></div>
                       </div>
                       <span>
                         {isInfiniteGuesses 
                           ? 'infinite more guesses available' 
-                          : `${remainingGuesses} more guess${remainingGuesses !== 1 ? 'es' : ''} available`
-                        }
+                          : `${remainingGuesses} more guess${remainingGuesses !== 1 ? 'es' : ''} available`}
                       </span>
                     </div>
                   </div>
@@ -225,28 +191,21 @@ function GameBoard({
             </div>
           </div>
         ) : (
-          // Centered container for few rows
-          <div className={`
-            h-full flex flex-col items-center justify-center
-            ${needsHorizontalScroll ? 'overflow-x-auto game-board-scroll' : ''}
-          `}>
-            <div className={needsHorizontalScroll ? 'min-w-max px-2' : ''}>
-              {rows}
-            </div>
+          <div className={`h-full flex flex-col items-center justify-center ${needsHorizontalScroll ? 'overflow-x-auto game-board-scroll' : ''}`}>
+            <div className={needsHorizontalScroll ? 'min-w-max px-2' : ''}>{rows}</div>
             {hasMoreRows && (
               <div className="mt-6">
-                <div className="glass-card px-4 py-2 rounded-full border border-white/20">
-                  <div className="flex items-center gap-2 text-white/60 text-sm">
+                <div className="glass-card px-4 py-2 rounded-full border border-white/20 bg-black/20 backdrop-blur-md">
+                  <div className="flex items-center gap-2 text-white/70 text-sm">
                     <div className="flex gap-1">
                       <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse"></div>
-                      <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-100"></div>
-                      <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-200"></div>
+                      <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-150"></div>
+                      <div className="w-1 h-1 bg-white/40 rounded-full animate-pulse delay-300"></div>
                     </div>
                     <span>
                       {isInfiniteGuesses 
                         ? 'infinite more guesses available' 
-                        : `${remainingGuesses} more guess${remainingGuesses !== 1 ? 'es' : ''} available`
-                      }
+                        : `${remainingGuesses} more guess${remainingGuesses !== 1 ? 'es' : ''} available`}
                     </span>
                   </div>
                 </div>
@@ -259,4 +218,4 @@ function GameBoard({
   );
 }
 
-export default memo(GameBoard); 
+export default memo(GameBoard);
