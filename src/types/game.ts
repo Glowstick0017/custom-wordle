@@ -8,10 +8,6 @@ export interface GameState {
   hardMode: boolean;
   realWordsOnly?: boolean;
   hint?: string;
-  timeTrialMode?: boolean;
-  timeLimit?: number;
-  timeRemaining?: number;
-  timeTaken?: number;
 }
 
 export interface CustomWordle {
@@ -21,8 +17,6 @@ export interface CustomWordle {
   realWordsOnly?: boolean;
   hint?: string;
   createdAt: string;
-  timeTrialMode?: boolean;
-  timeLimit?: number;
 }
 
 export interface GameStats {
@@ -31,8 +25,6 @@ export interface GameStats {
   currentStreak: number;
   maxStreak: number;
   guessDistribution: { [key: number]: number };
-  fastestTime?: number;
-  averageTime?: number;
 }
 
 export interface LetterState {
