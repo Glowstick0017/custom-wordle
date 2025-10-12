@@ -11,6 +11,7 @@ import StatsModal from '@/components/StatsModal';
 import CreateModal from '@/components/CreateModal';
 import HowToPlayModal from '@/components/HowToPlayModal';
 import AccessibilityToggle from '@/components/AccessibilityToggle';
+import Timer from '@/components/Timer';
 import { useAlert } from '@/components/Alert';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { decryptWordle } from '@/utils/encryption';
@@ -32,7 +33,11 @@ function PlayGameContent() {
     maxGuesses: 6,
     wordLength: 5,
     hardMode: false,
-    hint: undefined
+    hint: undefined,
+    timeTrialMode: false,
+    timeLimit: 60,
+    timeRemaining: 60,
+    timeTaken: 0
   });
 
   const [letterStates, setLetterStates] = useState<{ [key: string]: LetterState[] }>({});
@@ -46,6 +51,7 @@ function PlayGameContent() {
   const [wordDefinition, setWordDefinition] = useState<{ word: string; definition: string } | null>(null);
   const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
   const [currentGameId, setCurrentGameId] = useState<string | null>(null);
+  const [timerStarted, setTimerStarted] = useState(false);
 
   // Initialize game from URL parameter
   useEffect(() => {
@@ -62,6 +68,11 @@ function PlayGameContent() {
         setLetterStates(savedSession.letterStates);
         setKeyStates(savedSession.keyStates);
         setGameLoaded(true);
+        
+        // Restore timer state if in time trial mode and game is active
+        if (savedSession.gameState.timeTrialMode && savedSession.gameState.gameStatus === 'playing') {
+          setTimerStarted(savedSession.gameState.guesses.length > 0 || savedSession.gameState.currentGuess.length > 0);
+        }
 
         // If the game was already complete, show the game over modal
         if (savedSession.gameState.gameStatus === 'won' || savedSession.gameState.gameStatus === 'lost') {
@@ -72,7 +83,9 @@ function PlayGameContent() {
             savedSession.gameState.maxGuesses,
             savedSession.gameState.hardMode,
             savedSession.gameState.realWordsOnly,
-            savedSession.gameState.hint
+            savedSession.gameState.hint,
+            savedSession.gameState.timeTrialMode,
+            savedSession.gameState.timeTaken
           );
           setShareText(shareTextContent);
 
@@ -107,11 +120,16 @@ function PlayGameContent() {
           wordLength: decrypted.word.length,
           hardMode: decrypted.hardMode,
           realWordsOnly: decrypted.realWordsOnly,
-          hint: decrypted.hint
+          hint: decrypted.hint,
+          timeTrialMode: decrypted.timeTrialMode || false,
+          timeLimit: decrypted.timeLimit || 60,
+          timeRemaining: decrypted.timeLimit || 60,
+          timeTaken: 0
         });
         setLetterStates({});
         setKeyStates({});
         setShowGameOver(false);
+        setTimerStarted(false);
         setShareText('');
         setWordDefinition(null);
         setIsLoadingDefinition(false);
@@ -126,6 +144,74 @@ function PlayGameContent() {
     }
   }, [searchParams, router, showAlert]);
 
+  // Timer countdown effect
+  useEffect(() => {
+    if (!gameState.timeTrialMode || gameState.gameStatus !== 'playing' || !timerStarted) {
+      return;
+    }
+
+    // Pause timer when modals are open
+    if (showGameOver || showStats || showCreate || showHowToPlay) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setGameState(prev => {
+        const newTimeRemaining = Math.max(0, (prev.timeRemaining || 0) - 1);
+        
+        // Check if time is up
+        if (newTimeRemaining === 0 && prev.timeRemaining !== 0) {
+          // Time's up! Handle game over
+          setTimeout(() => {
+            updateStats(false, prev.guesses.length);
+            const shareTextContent = generateShareText(
+              prev.guesses,
+              prev.word,
+              'lost',
+              prev.maxGuesses,
+              prev.hardMode,
+              prev.realWordsOnly,
+              prev.hint,
+              prev.timeTrialMode,
+              prev.timeTaken
+            );
+            setShareText(shareTextContent);
+
+            // Fetch word definition
+            setIsLoadingDefinition(true);
+            fetchWordDefinition(prev.word, showAlert)
+              .then(definition => {
+                setWordDefinition(definition);
+                setIsLoadingDefinition(false);
+              })
+              .catch(() => {
+                setWordDefinition(null);
+                setIsLoadingDefinition(false);
+              });
+
+            showAlert("⏰ Time's up!", 'error');
+            setTimeout(() => setShowGameOver(true), 1000);
+          }, 0);
+          
+          return {
+            ...prev,
+            gameStatus: 'lost',
+            timeRemaining: 0,
+            timeTaken: (prev.timeTaken || 0) + 1
+          };
+        }
+        
+        return {
+          ...prev,
+          timeRemaining: newTimeRemaining,
+          timeTaken: (prev.timeTaken || 0) + 1
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameState.timeTrialMode, gameState.gameStatus, timerStarted, showGameOver, showStats, showCreate, showHowToPlay, showAlert]);
+
   // Save game state whenever it changes (but only after game is loaded and for valid games)
   useEffect(() => {
     if (gameLoaded && gameState.word && currentGameId) {
@@ -138,12 +224,17 @@ function PlayGameContent() {
     if (gameState.gameStatus !== 'playing') return;
 
     if (gameState.currentGuess.length < gameState.wordLength) {
+      // Start timer on first key press in Time Trial mode
+      if (gameState.timeTrialMode && !timerStarted && gameState.guesses.length === 0 && gameState.currentGuess.length === 0) {
+        setTimerStarted(true);
+      }
+
       setGameState(prev => ({
         ...prev,
         currentGuess: prev.currentGuess + key
       }));
     }
-  }, [gameState.gameStatus, gameState.currentGuess.length, gameState.wordLength]);
+  }, [gameState.gameStatus, gameState.currentGuess.length, gameState.wordLength, gameState.timeTrialMode, gameState.guesses.length, timerStarted]);
 
   const handleBackspace = useCallback(() => {
     if (gameState.gameStatus !== 'playing') return;
@@ -223,7 +314,17 @@ function PlayGameContent() {
     // Handle game end
     if (won || lost) {
       updateStats(won, newGuesses.length);
-      const shareTextContent = generateShareText(newGuesses, gameState.word, won ? 'won' : 'lost', gameState.maxGuesses, gameState.hardMode, gameState.realWordsOnly, gameState.hint);
+      const shareTextContent = generateShareText(
+        newGuesses, 
+        gameState.word, 
+        won ? 'won' : 'lost', 
+        gameState.maxGuesses, 
+        gameState.hardMode, 
+        gameState.realWordsOnly, 
+        gameState.hint,
+        gameState.timeTrialMode,
+        gameState.timeTaken
+      );
       setShareText(shareTextContent);
 
       // Fetch word definition
@@ -240,7 +341,7 @@ function PlayGameContent() {
 
       setTimeout(() => setShowGameOver(true), 1000);
     }
-  }, [gameState, keyStates]);
+  }, [gameState, keyStates, showAlert]);
 
   // Physical keyboard support
   useEffect(() => {
@@ -287,7 +388,9 @@ function PlayGameContent() {
       ...prev,
       guesses: [],
       currentGuess: '',
-      gameStatus: 'playing'
+      gameStatus: 'playing',
+      timeRemaining: prev.timeLimit,
+      timeTaken: 0
     }));
     setLetterStates({});
     setKeyStates({});
@@ -295,6 +398,7 @@ function PlayGameContent() {
     setShareText('');
     setWordDefinition(null);
     setIsLoadingDefinition(false);
+    setTimerStarted(false);
   };
 
   if (!gameLoaded) {
@@ -375,6 +479,14 @@ function PlayGameContent() {
                     </div>
                   </div>
                 )}
+                {gameState.timeTrialMode && (
+                  <div className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-bold rounded-full shadow-lg">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
+                      ⏱️
+                      <span className="hidden sm:inline">TIME TRIAL</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="text-xs text-white/70 leading-tight sm:leading-relaxed space-y-0.5 sm:space-y-1">
@@ -384,6 +496,11 @@ function PlayGameContent() {
                 )}
                 {gameState.realWordsOnly && (
                   <div className="text-blue-300 font-medium">Real words only</div>
+                )}
+                {gameState.timeTrialMode && (
+                  <div className="text-purple-300 font-medium">
+                    {timerStarted ? 'Timer running' : 'Timer starts on first letter'}
+                  </div>
                 )}
                 {gameState.hint && (
                   <div className="text-cyan-300 font-medium italic break-words">💡 {gameState.hint}</div>
@@ -406,15 +523,28 @@ function PlayGameContent() {
       </header>
 
       {/* Game Area - takes remaining space */}
-      <div className="flex-1 min-h-0 overflow-hidden px-2 sm:px-4">
-        <GameBoard
-          guesses={gameState.guesses}
-          currentGuess={gameState.currentGuess}
-          word={gameState.gameStatus !== 'playing' ? gameState.word : ''}
-          maxGuesses={gameState.maxGuesses}
-          wordLength={gameState.wordLength}
-          letterStates={letterStates}
-        />
+      <div className="flex-1 min-h-0 overflow-hidden px-2 sm:px-4 flex flex-col gap-3">
+        {/* Timer - only show in Time Trial mode */}
+        {gameState.timeTrialMode && (
+          <div className="flex-shrink-0 pt-2">
+            <Timer 
+              timeRemaining={gameState.timeRemaining || 0}
+              timeLimit={gameState.timeLimit || 60}
+              isPaused={showGameOver || showStats || showCreate || showHowToPlay}
+            />
+          </div>
+        )}
+        
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <GameBoard
+            guesses={gameState.guesses}
+            currentGuess={gameState.currentGuess}
+            word={gameState.gameStatus !== 'playing' ? gameState.word : ''}
+            maxGuesses={gameState.maxGuesses}
+            wordLength={gameState.wordLength}
+            letterStates={letterStates}
+          />
+        </div>
       </div>
 
       {/* Keyboard - always at bottom */}
@@ -437,11 +567,26 @@ function PlayGameContent() {
         <div className="text-center space-y-6">
           <div>
             {gameState.gameStatus === 'won' ? (
-              <p className="text-white/90 text-lg">You guessed the word in {gameState.guesses.length} tries!</p>
+              <div className="space-y-2">
+                <p className="text-white/90 text-lg">You guessed the word in {gameState.guesses.length} tries!</p>
+                {gameState.timeTrialMode && gameState.timeTaken !== undefined && (
+                  <div className="glass-card p-3 rounded-lg border border-purple-400/30 inline-block">
+                    <div className="flex items-center gap-2">
+                      <span className="text-purple-400">⏱️</span>
+                      <span className="text-white/90 font-bold">
+                        Time: {Math.floor(gameState.timeTaken / 60)}:{(gameState.timeTaken % 60).toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <div>
                 <p className="text-white/80">The word was:</p>
                 <p className={`text-3xl font-bold font-mono mt-2 ${isAccessibilityMode ? 'text-white' : 'gradient-text'}`}>{gameState.word}</p>
+                {gameState.timeTrialMode && gameState.timeRemaining === 0 && (
+                  <p className="text-red-400 text-sm mt-2">⏰ Time ran out!</p>
+                )}
               </div>
             )}
           </div>
