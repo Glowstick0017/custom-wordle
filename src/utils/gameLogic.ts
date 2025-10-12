@@ -181,24 +181,12 @@ export function generateShareText(
   maxGuesses: number,
   hardMode: boolean = false,
   realWordsOnly: boolean = false,
-  hint?: string,
-  timeTrialMode?: boolean,
-  timeTaken?: number
+  hint?: string
 ): string {
   const hardModeIndicator = hardMode ? ' *' : '';
   const result = gameStatus === 'won' 
     ? `${guesses.length}/${maxGuesses === Infinity ? '∞' : maxGuesses}${hardModeIndicator}`
     : `X/${maxGuesses === Infinity ? '∞' : maxGuesses}${hardModeIndicator}`;
-  
-  // Add time trial indicator if enabled
-  let timeInfo = '';
-  if (timeTrialMode && timeTaken !== undefined && gameStatus === 'won') {
-    const minutes = Math.floor(timeTaken / 60);
-    const seconds = timeTaken % 60;
-    timeInfo = ` ⏱️ ${minutes}:${seconds.toString().padStart(2, '0')}`;
-  } else if (timeTrialMode && gameStatus === 'lost') {
-    timeInfo = ' ⏱️ Time\'s up!';
-  }
   
   let grid = '';
   guesses.forEach(guess => {
@@ -225,9 +213,7 @@ export function generateShareText(
     maxGuesses: maxGuesses,
     hardMode: hardMode,
     realWordsOnly: realWordsOnly,
-    hint: hint,
-    timeTrialMode: timeTrialMode,
-    timeLimit: timeTrialMode ? 60 : undefined // Default, actual value doesn't matter for sharing
+    hint: hint
   });
   
   // Get the current domain or use a placeholder for the full URL
@@ -237,7 +223,7 @@ export function generateShareText(
   
   const gameUrl = `${baseUrl}/play?w=${encryptedGame}`;
   
-  return `Glowdle ${result}${timeInfo}\n\n${grid}\n${gameUrl}`;
+  return `Glowdle ${result}\n\n${grid}\n${gameUrl}`;
 }
 
 export function generateDailyShareText(
