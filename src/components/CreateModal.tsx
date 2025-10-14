@@ -108,8 +108,29 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       }
       const wordList = await response.text();
       const words = wordList.trim().split(/\s+/);
-      const randomWord = words[Math.floor(Math.random() * words.length)];
-      setWord(randomWord.toUpperCase());
+      
+      // Try to find a valid word (with a maximum of 10 attempts to avoid infinite loops)
+      let attempts = 0;
+      const maxAttempts = 10;
+      let validWordFound = false;
+      
+      while (attempts < maxAttempts && !validWordFound) {
+        const randomWord = words[Math.floor(Math.random() * words.length)];
+        
+        // Validate the word using validateRealWord
+        const validation = await validateRealWord(randomWord);
+        
+        if (validation.isValid) {
+          setWord(randomWord.toUpperCase());
+          validWordFound = true;
+        }
+        
+        attempts++;
+      }
+      
+      if (!validWordFound) {
+        showAlert('Failed to find a valid word. Please try again.', 'error');
+      }
     } catch (error) {
       console.error('Error fetching random word:', error);
       showAlert('Failed to fetch random word. Please try again.', 'error');
