@@ -63,9 +63,15 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       hint: hint.trim() || undefined
     };
 
-    const encrypted = encryptWordle(wordleData);
-    const link = `${window.location.origin}/play?w=${encrypted}`;
-    setGeneratedLink(link);
+    try {
+      const encrypted = encryptWordle(wordleData);
+      const link = `${window.location.origin}/play?w=${encrypted}`;
+      setGeneratedLink(link);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      showAlert(`Failed to encrypt game data. ${errorMessage}`, 'error');
+      console.error('Encryption error:', error);
+    }
   };
 
   const copyToClipboard = async () => {
@@ -113,15 +119,21 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   };
 
   const playNow = () => {
-    const encrypted = encryptWordle({
-      word: word.toUpperCase(),
-      maxGuesses: isInfinite ? Infinity : maxGuesses,
-      hardMode: hardMode,
-      realWordsOnly: realWordsOnly,
-      hint: hint.trim() || undefined
-    });
-    router.push(`/play?w=${encrypted}`);
-    handleClose();
+    try {
+      const encrypted = encryptWordle({
+        word: word.toUpperCase(),
+        maxGuesses: isInfinite ? Infinity : maxGuesses,
+        hardMode: hardMode,
+        realWordsOnly: realWordsOnly,
+        hint: hint.trim() || undefined
+      });
+      router.push(`/play?w=${encrypted}`);
+      handleClose();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      showAlert(`Failed to encrypt game data. ${errorMessage}`, 'error');
+      console.error('Encryption error:', error);
+    }
   };
 
   return (

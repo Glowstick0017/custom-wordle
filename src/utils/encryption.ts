@@ -58,15 +58,29 @@ export function encryptWordle(wordle: { word: string; maxGuesses: number; hardMo
   
   // Add hint if provided (base64 encoded to handle special characters)
   if (wordle.hint) {
-    const encodedHint = btoa(wordle.hint).replace(/[+/=]/g, (char) => {
-      switch (char) {
-        case '+': return '-';
-        case '/': return '_';
-        case '=': return '';
-        default: return char;
+    try {
+      const encodedHint = btoa(wordle.hint).replace(/[+/=]/g, (char) => {
+        switch (char) {
+          case '+': return '-';
+          case '/': return '_';
+          case '=': return '';
+          default: return char;
+        }
+      });
+      suffix += `_hint${encodedHint}`;
+    } catch (error) {
+      // Find the problematic characters (outside Latin1 range)
+      const problematicChars = Array.from(wordle.hint)
+        .filter(char => char.charCodeAt(0) > 255)
+        .filter((char, index, self) => self.indexOf(char) === index); // unique characters only
+      
+      if (problematicChars.length > 0) {
+        const charList = problematicChars.map(char => `"${char}"`).join(', ');
+        throw new Error(`Hint contains unsupported character(s): ${charList}. Please remove these characters or use standard text only.`);
       }
-    });
-    suffix += `_hint${encodedHint}`;
+      
+      throw new Error('Hint contains unsupported characters. Please use only standard text characters.');
+    }
   }
   
   return `${encryptedWord}${suffix}`;
