@@ -46,7 +46,7 @@ export async function validateRealWord(word: string, showAlert?: (message: strin
   }
 
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+    const response = await fetch(`https://freedictionaryapi.com/api/v1/entries/en/${word.toLowerCase()}`);
     
     if (response.status === 404) {
       return { isValid: false, error: 'Not a real word' };
@@ -80,7 +80,7 @@ export async function fetchWordDefinition(word: string, showAlert?: (message: st
   }
 
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+    const response = await fetch(`https://freedictionaryapi.com/api/v1/entries/en/${word.toLowerCase()}`);
     
     if (response.status === 404) {
       return null; // Word not found
@@ -100,12 +100,13 @@ export async function fetchWordDefinition(word: string, showAlert?: (message: st
     const data = await response.json();
     
     // Extract the first definition from the response
-    if (data && data.length > 0 && data[0].meanings && data[0].meanings.length > 0) {
-      const firstMeaning = data[0].meanings[0];
-      if (firstMeaning.definitions && firstMeaning.definitions.length > 0) {
+    // New API structure: { word, entries: [{ senses: [{ definition }] }] }
+    if (data && data.entries && data.entries.length > 0) {
+      const firstEntry = data.entries[0];
+      if (firstEntry.senses && firstEntry.senses.length > 0) {
         return {
-          word: data[0].word,
-          definition: firstMeaning.definitions[0].definition
+          word: data.word,
+          definition: firstEntry.senses[0].definition
         };
       }
     }

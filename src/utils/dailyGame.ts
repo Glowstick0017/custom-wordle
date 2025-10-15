@@ -217,7 +217,7 @@ export async function validateDailyWord(word: string, showAlert?: (message: stri
   }
 
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
+    const response = await fetch(`https://freedictionaryapi.com/api/v1/entries/en/${word.toLowerCase()}`);
     
     if (response.status === 404) {
       // 404 is expected for invalid words, don't show alert
