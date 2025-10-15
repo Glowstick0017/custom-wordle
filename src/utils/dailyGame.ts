@@ -219,12 +219,6 @@ export async function validateDailyWord(word: string, showAlert?: (message: stri
   try {
     const response = await fetch(`https://freedictionaryapi.com/api/v1/entries/en/${word.toLowerCase()}`);
     
-    if (response.status === 404) {
-      // 404 is expected for invalid words, don't show alert
-      validatedWordsCache.set(upperWord, false);
-      return false;
-    }
-    
     if (!response.ok) {
       const errorMsg = `Dictionary API error: HTTP ${response.status}`;
       console.error(errorMsg);
@@ -235,8 +229,16 @@ export async function validateDailyWord(word: string, showAlert?: (message: stri
       return false;
     }
     
-    const isValid = response.status === 200;
-    // Cache the result
+    const data = await response.json();
+    
+    // Check if the response contains valid entries with definitions
+    const isValid = data && 
+                    data.entries && 
+                    data.entries.length > 0 && 
+                    data.entries[0].senses && 
+                    data.entries[0].senses.length > 0;
+    
+    // Cache the result (whether valid or not)
     validatedWordsCache.set(upperWord, isValid);
     return isValid;
   } catch (error) {

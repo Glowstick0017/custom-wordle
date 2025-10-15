@@ -48,10 +48,6 @@ export async function validateRealWord(word: string, showAlert?: (message: strin
   try {
     const response = await fetch(`https://freedictionaryapi.com/api/v1/entries/en/${word.toLowerCase()}`);
     
-    if (response.status === 404) {
-      return { isValid: false, error: 'Not a real word' };
-    }
-    
     if (!response.ok) {
       const errorMsg = `Dictionary API error: HTTP ${response.status}`;
       console.error(errorMsg);
@@ -59,6 +55,19 @@ export async function validateRealWord(word: string, showAlert?: (message: strin
         showAlert('Unable to verify word. Please try again later.', 'error');
       }
       return { isValid: false, error: 'Could not verify word' };
+    }
+    
+    const data = await response.json();
+    
+    // Check if the response contains valid entries with definitions
+    const hasValidDefinition = data && 
+                               data.entries && 
+                               data.entries.length > 0 && 
+                               data.entries[0].senses && 
+                               data.entries[0].senses.length > 0;
+    
+    if (!hasValidDefinition) {
+      return { isValid: false, error: 'Not a real word' };
     }
     
     return { isValid: true };
@@ -82,17 +91,11 @@ export async function fetchWordDefinition(word: string, showAlert?: (message: st
   try {
     const response = await fetch(`https://freedictionaryapi.com/api/v1/entries/en/${word.toLowerCase()}`);
     
-    if (response.status === 404) {
-      return null; // Word not found
-    }
-    
     if (!response.ok) {
-      if (response.status !== 404) {
-        const errorMsg = `Dictionary API error: HTTP ${response.status}`;
-        console.error(errorMsg);
-        if (showAlert) {
-          showAlert('Unable to fetch word definition. Please try again later.', 'error');
-        }
+      const errorMsg = `Dictionary API error: HTTP ${response.status}`;
+      console.error(errorMsg);
+      if (showAlert) {
+        showAlert('Unable to fetch word definition. Please try again later.', 'error');
       }
       return null;
     }
@@ -111,7 +114,7 @@ export async function fetchWordDefinition(word: string, showAlert?: (message: st
       }
     }
     
-    return null;
+    return null; // Word not found (no entries/senses in response)
   } catch (error) {
     console.error('Dictionary API error:', error);
     if (showAlert) {
