@@ -119,7 +119,7 @@ function Keyboard({
           disabled={disabled}
           aria-label="Enter"
         >
-          <CornerDownLeft size={14} className="sm:mr-1" />
+          <CornerDownLeft size={14} className="hidden sm:inline sm:mr-1" />
           <span className="hidden sm:inline text-xs font-bold">ENTER</span>
           <span className="sm:hidden text-xs font-bold">⏎</span>
         </button>
@@ -134,7 +134,7 @@ function Keyboard({
           disabled={disabled}
           aria-label="Delete"
         >
-          <Delete size={14} className="sm:mr-1" />
+          <Delete size={14} className="hidden sm:inline sm:mr-1" />
           <span className="hidden sm:inline text-xs font-bold">DEL</span>
           <span className="sm:hidden text-xs font-bold">⌫</span>
         </button>
