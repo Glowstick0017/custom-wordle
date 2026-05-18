@@ -23,16 +23,16 @@ export default function Home() {
     preloadWordList();
   }, []);
 
-  const handlePlayDaily = () => {
-    router.push('/daily');
-  };
+  // const handlePlayDaily = () => {
+  //   router.push('/daily');
+  // };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Accessibility Toggle - Top Right */}
-      <div className="absolute top-4 right-4 z-20">
-        <AccessibilityToggle />
-      </div>
+      {/*<div className="absolute top-4 right-4 z-20">*/}
+      {/*  <AccessibilityToggle />*/}
+      {/*</div>*/}
 
       {/* Floating gradient orbs - hidden in accessibility mode - REDUCED FOR PERFORMANCE */}
       {!isAccessibilityMode && (
@@ -57,18 +57,6 @@ export default function Home() {
 
         {/* Action Buttons */}
         <div className="space-y-4">
-          <button
-            onClick={handlePlayDaily}
-            className="w-full btn-gradient-accent text-white font-bold py-5 px-6 rounded-xl flex items-center justify-center gap-3 text-lg relative group"
-          >
-            <Calendar size={24} />
-            <div className="flex flex-col items-start">
-              <span>Play Daily Game</span>
-              <span className="text-xs text-white/70 group-hover:text-white/90 transition-colors">
-                {getDailyGameDate()}
-              </span>
-            </div>
-          </button>
 
           <button
             onClick={() => setShowCreate(true)}
@@ -78,13 +66,13 @@ export default function Home() {
             Create Custom Glowdle
           </button>
 
-          <button
-            onClick={() => setShowStats(true)}
-            className="w-full btn-gradient-secondary text-white font-bold py-5 px-6 rounded-xl flex items-center justify-center gap-3 text-lg"
-          >
-            <BarChart3 size={24} />
-            View Statistics
-          </button>
+          {/*<button*/}
+          {/*  onClick={() => setShowStats(true)}*/}
+          {/*  className="w-full btn-gradient-secondary text-white font-bold py-5 px-6 rounded-xl flex items-center justify-center gap-3 text-lg"*/}
+          {/*>*/}
+          {/*  <BarChart3 size={24} />*/}
+          {/*  View Statistics*/}
+          {/*</button>*/}
         </div>
 
         {/* Instructions */}

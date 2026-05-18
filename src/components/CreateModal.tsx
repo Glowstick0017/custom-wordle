@@ -22,7 +22,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [maxGuesses, setMaxGuesses] = useState(6);
   const [isInfinite, setIsInfinite] = useState(false);
   const [hardMode, setHardMode] = useState(false);
-  const [realWordsOnly, setRealWordsOnly] = useState(false);
+  const [realWordsOnly, setRealWordsOnly] = useState(true);
   const [hint, setHint] = useState('');
   const [isLoadingRandomWord, setIsLoadingRandomWord] = useState(false);
   const [isValidatingWord, setIsValidatingWord] = useState(false);
