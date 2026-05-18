@@ -1,3 +1,5 @@
+**Note**: This fork has some modifications for my personal use. You probably want to stick with the original version at https://github.com/Glowstick0017/custom-wordle
+
 # Custom Wordle
 
 A full-featured Next.js application for creating and playing custom Wordle games with any word length and customizable guess limits.
