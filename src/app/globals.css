@@ -68,6 +68,20 @@ button, [role="button"] {
   -ms-user-select: none;
 }
 
+.game-board-centered {
+  justify-content: center;
+}
+
+.game-board-area {
+  container-type: size;
+}
+
+@supports (justify-content: safe center) {
+  .game-board-centered {
+    justify-content: safe center;
+  }
+}
+
 /* Game board scrolling */
 .game-board-scroll {
   scrollbar-width: thin;
@@ -240,6 +254,65 @@ html, body {
 /* Safe area utilities */
 .pb-safe {
   padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) and (max-height: 820px) {
+  .game-header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .game-board-area {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .game-board-frame {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .game-board-row {
+    gap: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .game-board-row:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .game-board-tile {
+    width: min(var(--compact-tile-max), var(--fit-height-tile-size), var(--fit-width-tile-size)) !important;
+    height: min(var(--compact-tile-max), var(--fit-height-tile-size), var(--fit-width-tile-size)) !important;
+  }
+
+  .game-keyboard-area {
+    padding-bottom: max(0.25rem, env(safe-area-inset-bottom));
+  }
+
+  .game-keyboard.keyboard-container {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .game-keyboard .keyboard-row {
+    gap: 0.375rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .game-keyboard .keyboard-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .game-keyboard .keyboard-row-middle {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .game-keyboard .keyboard-key {
+    height: 2.75rem !important;
+    min-height: 2.75rem !important;
+  }
 }
 
 .pt-safe {

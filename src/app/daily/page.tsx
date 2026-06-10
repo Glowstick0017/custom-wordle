@@ -283,7 +283,7 @@ function DailyGameContent() {
   }
 
   return (
-    <div className="min-h-screen h-screen flex flex-col max-w-screen overflow-x-hidden relative">
+    <div className="game-screen min-h-screen h-screen flex flex-col max-w-screen overflow-x-hidden relative">
       {/* Background gradient orbs - REDUCED FOR PERFORMANCE */}
       {!isAccessibilityMode && (
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
@@ -293,7 +293,7 @@ function DailyGameContent() {
       )}
 
       {/* Header */}
-      <header className="flex-shrink-0 glass-card border-b border-white/10 p-2 sm:p-4 relative z-0">
+      <header className="game-header flex-shrink-0 glass-card border-b border-white/10 p-2 sm:p-4 relative z-0">
         <div className="max-w-lg mx-auto">
           <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2 sm:gap-4">
             {/* Left buttons */}
@@ -342,7 +342,7 @@ function DailyGameContent() {
       </header>
 
       {/* Game Area - takes remaining space */}
-      <div className="flex-1 min-h-0 overflow-hidden px-2 sm:px-4">
+      <div className="game-board-area flex-1 min-h-0 overflow-hidden px-2 sm:px-4">
         <GameBoard
           guesses={gameState.guesses}
           currentGuess={gameState.currentGuess}
@@ -354,7 +354,7 @@ function DailyGameContent() {
       </div>
 
       {/* Keyboard - always at bottom */}
-      <div className="flex-shrink-0 pb-safe px-2">
+      <div className="game-keyboard-area flex-shrink-0 pb-safe px-2">
         <Keyboard
           onKeyPress={handleKeyPress}
           onEnter={handleEnter}

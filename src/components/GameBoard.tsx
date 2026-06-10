@@ -1,7 +1,7 @@
 'use client';
 
 import { LetterState } from '@/types/game';
-import { memo, useRef } from 'react';
+import { CSSProperties, memo, useRef } from 'react';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 
 interface GameBoardProps {
@@ -28,10 +28,10 @@ function GameBoard({
   const safeMaxGuesses = Math.max(1, Math.min(maxGuesses || 6, 999));
   
   const getTileSize = (length: number) => {
-    if (length === 1) return 'w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24';
-    if (length <= 3) return 'w-12 h-12 sm:w-16 sm:h-16 md:w-18 md:h-18';
-    if (length <= 5) return 'w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16';
-    if (length <= 7) return 'w-8 h-8 sm:w-12 sm:h-12 md:w-14 md:h-14';
+    if (length === 1) return 'w-14 h-14 sm:w-[clamp(4rem,8.5svh,5rem)] sm:h-[clamp(4rem,8.5svh,5rem)] md:w-[clamp(4rem,8.5svh,6rem)] md:h-[clamp(4rem,8.5svh,6rem)]';
+    if (length <= 3) return 'w-12 h-12 sm:w-[clamp(3.5rem,8svh,4rem)] sm:h-[clamp(3.5rem,8svh,4rem)] md:w-[clamp(3.5rem,8svh,4.5rem)] md:h-[clamp(3.5rem,8svh,4.5rem)]';
+    if (length <= 5) return 'w-10 h-10 sm:w-[clamp(3rem,7.2svh,3.5rem)] sm:h-[clamp(3rem,7.2svh,3.5rem)] md:w-[clamp(3rem,7.2svh,4rem)] md:h-[clamp(3rem,7.2svh,4rem)]';
+    if (length <= 7) return 'w-8 h-8 sm:w-[clamp(2.75rem,7svh,3rem)] sm:h-[clamp(2.75rem,7svh,3rem)] md:w-[clamp(2.75rem,7svh,3.5rem)] md:h-[clamp(2.75rem,7svh,3.5rem)]';
     if (length <= 10) return 'w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12';
     if (length <= 15) return 'w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10';
     if (length <= 20) return 'w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8';
@@ -63,7 +63,7 @@ function GameBoard({
     return (
       <div 
         key={rowIndex}
-        className={`flex ${getGapSize(wordLength)} justify-center mb-2 sm:mb-3`}
+        className={`game-board-row flex ${getGapSize(wordLength)} justify-center mb-2 sm:mb-3`}
       >
         {Array.from({ length: wordLength }, (_, i) => {
           const letter = letters[i] || '';
@@ -73,6 +73,7 @@ function GameBoard({
             <div
               key={i}
               className={`
+                game-board-tile
                 ${getTileSize(wordLength)}
                 border-2 flex items-center justify-center
                 ${getFontSize(wordLength)} font-bold
@@ -182,11 +183,40 @@ function GameBoard({
     return 'max-w-full';
   };
 
+  const getContainerMaxWidth = (length: number) => {
+    if (length <= 3) return '28rem';
+    if (length <= 5) return '32rem';
+    if (length <= 10) return '36rem';
+    if (length <= 15) return '42rem';
+    return '100cqw';
+  };
+
+  const getCompactTileMax = (length: number) => {
+    if (length === 1) return '6rem';
+    if (length <= 3) return '4.5rem';
+    if (length <= 5) return '4rem';
+    if (length <= 7) return '3.5rem';
+    if (length <= 10) return '3rem';
+    if (length <= 15) return '2.5rem';
+    if (length <= 20) return '2rem';
+    return '1.5rem';
+  };
+
+  const visibleRowCount = Math.max(rows.length, 1);
+  const compactBoardStyle = {
+    '--compact-tile-max': getCompactTileMax(wordLength),
+    '--fit-height-tile-size': `calc((100cqh - ${Math.max(visibleRowCount - 1, 0) * 8}px - 1.5rem) / ${visibleRowCount})`,
+    '--fit-width-tile-size': `calc((min(100cqw, ${getContainerMaxWidth(wordLength)}) - ${Math.max(wordLength - 1, 0) * 8}px - 1rem) / ${Math.max(wordLength, 1)})`,
+  } as CSSProperties;
+
   // Update vertical scroll detection based on visible rows
   const needsVerticalScrollNow = maxVisibleRows > 8;
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-1 sm:p-2 overflow-hidden">
+    <div
+      className="game-board-frame w-full h-full flex items-center justify-center p-1 sm:p-2 overflow-hidden"
+      style={compactBoardStyle}
+    >
       <div className={`w-full ${getContainerSize(wordLength)} h-full max-h-full overflow-hidden`}>
         {needsVerticalScrollNow ? (
           // Scrollable container for many visible rows
@@ -227,7 +257,7 @@ function GameBoard({
         ) : (
           // Centered container for few rows
           <div className={`
-            h-full flex flex-col items-center justify-center
+            game-board-centered h-full flex flex-col items-center
             ${needsHorizontalScroll ? 'overflow-x-auto game-board-scroll' : ''}
           `}>
             <div className={needsHorizontalScroll ? 'min-w-max px-2' : ''}>

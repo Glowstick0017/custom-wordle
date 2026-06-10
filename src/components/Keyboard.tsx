@@ -100,19 +100,19 @@ function Keyboard({
   };
 
   return (
-    <div className={`w-full max-w-lg mx-auto keyboard-container ${isAccessibilityMode ? 'p-1 sm:p-3' : 'p-2 sm:p-4'}`}>
+    <div className={`game-keyboard w-full max-w-lg mx-auto keyboard-container ${isAccessibilityMode ? 'p-1 sm:p-3' : 'p-2 sm:p-4'}`}>
       {/* Top row - Q W E R T Y U I O P */}
-      <div className={`flex justify-center ${isAccessibilityMode ? 'gap-0.5 sm:gap-1 mb-1 sm:mb-2' : 'gap-1 sm:gap-2 mb-2 sm:mb-3'}`}>
+      <div className={`keyboard-row flex justify-center ${isAccessibilityMode ? 'gap-0.5 sm:gap-1 mb-1 sm:mb-2' : 'gap-1 sm:gap-2 mb-2 sm:mb-3'}`}>
         {topRow.map(renderKey)}
       </div>
       
       {/* Middle row - A S D F G H J K L (offset for natural keyboard feel) */}
-      <div className={`flex justify-center ${isAccessibilityMode ? 'gap-0.5 sm:gap-1 mb-1 sm:mb-2 px-2 sm:px-3' : 'gap-1 sm:gap-2 mb-2 sm:mb-3 px-3 sm:px-4'}`}>
+      <div className={`keyboard-row keyboard-row-middle flex justify-center ${isAccessibilityMode ? 'gap-0.5 sm:gap-1 mb-1 sm:mb-2 px-2 sm:px-3' : 'gap-1 sm:gap-2 mb-2 sm:mb-3 px-3 sm:px-4'}`}>
         {middleRow.map(renderKey)}
       </div>
       
       {/* Bottom row - ENTER Z X C V B N M DELETE */}
-      <div className={`flex justify-center ${isAccessibilityMode ? 'gap-0.5 sm:gap-1' : 'gap-1 sm:gap-2'}`}>
+      <div className={`keyboard-row flex justify-center ${isAccessibilityMode ? 'gap-0.5 sm:gap-1' : 'gap-1 sm:gap-2'}`}>
         <button
           className={`${specialKeyStyle} keyboard-key`}
           onClick={() => !disabled && onEnter()}
