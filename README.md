@@ -138,3 +138,9 @@ This project is open source and available under the [MIT License](LICENSE).
 
 - Inspired by the original Wordle game by Josh Wardle
 - Built with modern web technologies for the best user experience
+
+
+## Contributing
+
+We welcome contributions from everyone! Please read our [Code of Conduct](./CODE_OF_CONDUCT.md) before contributing to ensure a respectful and welcoming community.
+
